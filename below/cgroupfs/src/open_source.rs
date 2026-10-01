@@ -14,9 +14,12 @@
 
 mod network_counters;
 
+#[cfg(feature = "cgroup-bpf")]
 mod cgroup_bpf_skel {
     include!(concat!(env!("OUT_DIR"), "/cgroup_bpf.skel.rs"));
 }
 // The driver names the loaded-skel type to hold it across samples.
+#[cfg(feature = "cgroup-bpf")]
 pub use cgroup_bpf_skel::CgroupBpfSkel;
+#[cfg(feature = "cgroup-bpf")]
 pub use cgroup_bpf_skel::CgroupBpfSkelBuilder;

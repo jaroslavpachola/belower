@@ -14,19 +14,16 @@
 
 //! Data types and decoding for the BPF cgroup reader.
 //!
-//! Holds the wire record the BPF program emits, the below-side stats it decodes
-//! into, the snapshot/handle the collector uses, and the functions that turn one
-//! into the other. Decoding is a pure function of the record except for the cpu
+//! Holds the wire record the BPF program emits and the functions that decode it
+//! into the below-side stats (crate::bpf_snapshot). Decoding is a pure function of the record except for the cpu
 //! user/system split, which has to remember what it last reported per cgroup.
 //! Nothing here touches libbpf; the driver in the parent module owns that.
 
 use std::collections::HashMap;
 use std::sync::LazyLock;
-use std::sync::mpsc::Receiver;
-use std::sync::mpsc::Sender;
 
-use anyhow::Result;
-
+use crate::CgroupBpfSnapshot;
+use crate::CgroupBpfStat;
 use crate::CgroupStat;
 use crate::CpuStat;
 use crate::MemoryEvents;
@@ -325,64 +322,6 @@ fn decode_memory_stat(rec: &CgroupBpfRecord) -> MemoryStat {
         pglazyfreed: ms(rec.ms_pglazyfreed),
         thp_fault_alloc: ms(rec.ms_thp_fault_alloc),
         thp_collapse_alloc: ms(rec.ms_thp_collapse_alloc),
-    }
-}
-
-/// Per-cgroup stats sourced from BPF and overlaid onto file reads. Every
-/// `Option` field falls back to the cgroupfs file when `None` (the kernel could
-/// not supply it, or the cgroup was absent from the BPF traversal), so the data
-/// is never partial or wrong. `parent_id` is BPF-only metadata with no file
-/// equivalent -- the parent cgroup's id, 0 for the root -- so the tree can be
-/// rebuilt from a snapshot alone.
-#[derive(Clone, Debug, Default)]
-pub struct CgroupBpfStat {
-    pub parent_id: u64,
-    pub cpu_stat: Option<CpuStat>,
-    pub memory_current: Option<i64>,
-    pub memory_stat: Option<MemoryStat>,
-    pub cgroup_stat: Option<CgroupStat>,
-    pub memory_events: Option<MemoryEvents>,
-    pub memory_events_local: Option<MemoryEventsLocal>,
-    pub memory_min: Option<i64>,
-    pub memory_low: Option<i64>,
-    pub memory_high: Option<i64>,
-    pub memory_max: Option<i64>,
-    pub memory_oom_group: Option<u32>,
-}
-
-/// A sample's BPF-collected cgroup stats, keyed by cgroup id -- which equals the
-/// cgroup directory inode `CgroupReader::read_inode_number` returns, so it joins
-/// directly against the cgroupfs walk.
-pub type CgroupBpfSnapshot = HashMap<u64, CgroupBpfStat>;
-
-/// Handle for obtaining a fresh BPF snapshot each sample. It carries only
-/// channels, so the collector can request a snapshot without touching libbpf.
-/// `collect` sends a request and blocks for the reply; the exchange is 1:1 and
-/// in order, so the snapshot always matches this call.
-pub struct CgroupBpfHandle {
-    req: Sender<()>,
-    resp: Receiver<Result<CgroupBpfSnapshot>>,
-}
-
-impl CgroupBpfHandle {
-    pub fn new(req: Sender<()>, resp: Receiver<Result<CgroupBpfSnapshot>>) -> Self {
-        Self { req, resp }
-    }
-
-    /// Ask the driver to flush at the cgroup root, traverse the tree, and reply
-    /// with the fresh snapshot; block until it arrives. Returns `None` on any
-    /// error or if the driver is not running, so the caller falls back to files.
-    /// Setup errors surface via the driver's own error channel, so they are
-    /// swallowed here to avoid per-sample log spam.
-    pub fn collect(&self) -> Option<CgroupBpfSnapshot> {
-        if self.req.send(()).is_err() {
-            return None;
-        }
-        match self.resp.recv() {
-            Ok(Ok(snapshot)) => Some(snapshot),
-            Ok(Err(_)) => None,
-            Err(_) => None,
-        }
     }
 }
 

@@ -615,9 +615,7 @@ fn check_for_exitstat_errors(logger: &slog::Logger, receiver: &Receiver<Error>) 
     match receiver.try_recv() {
         Ok(e) => {
             // When running as non-root for live, ignore EACCESS
-            if let Some(e) = e.downcast_ref::<libbpf_rs::Error>()
-                && e.kind() == libbpf_rs::ErrorKind::PermissionDenied
-            {
+            if exitstat::is_permission_denied(&e) {
                 return false;
             }
             error!(logger, "{:#}", e);

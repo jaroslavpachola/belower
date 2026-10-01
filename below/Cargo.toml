@@ -13,7 +13,6 @@ license = "Apache-2.0"
 [package.metadata]
 
 [package.metadata.deb]
-depends = "libelf1, zlib1g"
 
 [package.metadata.deb.systemd-units]
 unit-name = "below"
@@ -21,7 +20,9 @@ unit-scripts = "../etc"
 
 [dependencies]
 anyhow = "1.0.104"
-below-vmlinux = { version = "0.11.0", path = "vmlinux" }
+aya = { version = "0.14.0", default-features = false }
+below-exitstat-common = { version = "0.11.0", path = "exitstat-common", features = ["user"] }
+btf-rs = "2.0.0"
 cgroupfs = { version = "0.11.0", path = "cgroupfs" }
 clap = { version = "4.6.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 clap_complete = { version = "4.6.11", features = ["unstable-dynamic"] }
@@ -29,12 +30,11 @@ common = { package = "below-common", version = "0.11.0", path = "common" }
 config = { package = "below-config", version = "0.11.0", path = "config" }
 cursive = { version = "0.21.1", features = ["crossterm-backend"], default-features = false }
 dump = { package = "below-dump", version = "0.11.0", path = "dump" }
+fallible-iterator = "0.3"
 indicatif = { version = "0.18.6", features = ["futures", "improved_unicode", "rayon", "tokio"] }
-libbpf-rs = { version = "0.27.2", default-features = false }
 libc = "0.2.186"
 model = { package = "below-model", version = "0.11.0", path = "model" }
 nix = { version = "0.31.3", features = ["dir", "event", "hostname", "inotify", "ioctl", "mman", "mount", "net", "poll", "ptrace", "reboot", "resource", "sched", "signal", "term", "time", "user", "zerocopy"] }
-plain = "0.2"
 procfs = { package = "fb_procfs", version = "0.11.0", path = "procfs" }
 regex = "1.13.1"
 scopeguard = "1.2.0"
@@ -53,11 +53,10 @@ view = { package = "below-view", version = "0.11.0", path = "view" }
 maplit = "1.0"
 portpicker = "0.1.1"
 
-[build-dependencies]
-below-vmlinux = { version = "0.11.0", path = "vmlinux" }
-libbpf-cargo = { version = "0.27.2", default-features = false }
-
 [features]
-default = ["libbpf-cargo/default", "libbpf-rs/default"]
+default = []
+# Read cgroup stats with a BPF iterator when enable_cgroup_bpf is set. Builds
+# libbpf and the BPF program from C, so it needs clang, libelf and zlib.
+cgroup-bpf = ["cgroupfs/cgroup-bpf"]
 enable_backtrace = []
 no-vendor = ["store/no-vendor"]

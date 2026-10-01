@@ -1,0 +1,26 @@
+# The exitstat BPF program. Built for the BPF target by below's build.rs (see
+# there), so it is its own workspace rather than a member of below's.
+
+[package]
+name = "below-exitstat-ebpf"
+version = "0.11.0"
+edition = "2024"
+description = "below's exitstat BPF program"
+repository = "https://github.com/facebookincubator/below"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+aya-ebpf = "0.2.1"
+below-exitstat-common = { path = "../exitstat-common" }
+
+[[bin]]
+name = "exitstat"
+path = "src/main.rs"
+
+[profile.release]
+panic = "abort"
+# BTF for the program and its maps comes from debug info.
+debug = 2
+
+[workspace]

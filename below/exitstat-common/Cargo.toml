@@ -1,0 +1,14 @@
+[package]
+name = "below-exitstat-common"
+version = "0.11.0"
+edition = "2024"
+description = "Data layout shared by below's exitstat BPF program and its loader"
+repository = "https://github.com/facebookincubator/below"
+license = "Apache-2.0"
+
+[dependencies]
+aya = { version = "0.14.0", default-features = false, optional = true }
+
+[features]
+# Loader side: lets aya copy these types in and out of the BPF program.
+user = ["dep:aya"]

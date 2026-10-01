@@ -37,7 +37,12 @@ use thiserror::Error;
 mod types;
 pub use types::*;
 
+mod bpf_snapshot;
+pub use bpf_snapshot::*;
+
+#[cfg(feature = "cgroup-bpf")]
 mod cgroup_bpf;
+#[cfg(feature = "cgroup-bpf")]
 pub use cgroup_bpf::*;
 
 #[cfg(test)]

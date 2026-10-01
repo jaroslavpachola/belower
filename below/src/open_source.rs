@@ -12,14 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod bpf {
-    include!(concat!(env!("OUT_DIR"), "/exitstat.skel.rs"));
-}
 pub mod commands;
 pub mod gpu_stats;
 pub mod init;
 pub mod logging;
 pub mod remote_host;
 pub mod statistics;
-
-pub use bpf::ExitstatSkelBuilder;

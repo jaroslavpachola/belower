@@ -7,6 +7,7 @@ members = [
   "below/common",
   "below/config",
   "below/dump",
+  "below/exitstat-common",
   "below/ethtool",
   "below/gpu_stats",
   "below/model",
@@ -18,6 +19,8 @@ members = [
   "below/view",
   "below/vmlinux",
 ]
+# Built for the BPF target by below/build.rs.
+exclude = ["below/exitstat-ebpf"]
 resolver = "2"
 
 [workspace.package]

@@ -26,6 +26,7 @@ from os import path
 # NB: Order the list based on dependencies: least deps first, most deps last
 PACKAGES = [
     "below/common",
+    "below/exitstat-common",
     "below/tc",
     "below/ethtool",
     "below/cgroupfs",

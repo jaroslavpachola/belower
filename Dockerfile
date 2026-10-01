@@ -16,20 +16,26 @@
 FROM fedora:42 AS builder
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN <<HEREDOC
-    # `clang` is required by `libbpf-cargo` for building `below/src/bpf/exitstat.bpf.c`
     # `zig` + `cargo-zigbuild` allows for easier cross-compilation + building with broader glibc support
-    dnf install -yq clang elfutils-libelf-devel rustup zig
+    # `gcc` provides `cc` (cargo-zigbuild and other build scripts link with it) and `strip`
+    dnf install -yq gcc rustup zig zstd
     dnf clean all
 
-    # `libbpf-cargo` requires the `rustfmt` component to generate `exitstat.skel.rs`
-    rustup-init -y --profile minimal --default-toolchain stable --component rustfmt
+    rustup-init -y --profile minimal --default-toolchain stable
     cargo install cargo-zigbuild
+
+    # `bpf-linker` links the exitstat BPF program (below/exitstat-ebpf)
+    curl -sSL "https://github.com/aya-rs/bpf-linker/releases/download/v0.11.1/bpf-linker-$(uname -m)-unknown-linux-musl.tar.zst" \
+        | tar --zstd -x -C /root/.cargo/bin
 HEREDOC
 WORKDIR /app
 # Only copy over files/dirs needed for the build:
 COPY Cargo.lock Cargo.toml .
 COPY below/ below/
 RUN <<HEREDOC
+    # The nightly toolchain the exitstat BPF program builds with (its rust-toolchain.toml)
+    (cd below/exitstat-ebpf && rustup toolchain install)
+
     # Building with `cargo zigbuild` excludes the standard system paths, add them back:
     # - CFLAGS is needed as a includes fallback for discovering headers from installed packages.
     # - RUSTFLAGS is needed for crates with `build.rs` scripts to include the search path for linking libs.
@@ -52,7 +58,7 @@ RUN cargo deb --package below --no-build --target "$(uname -m)-unknown-linux-gnu
 FROM fedora:42 AS root-fs
 RUN <<HEREDOC
     dnf --installroot /root-fs --use-host-config --setopt=install_weak_deps=0 \
-        install -yq elfutils-libelf glibc libgcc libzstd zlib-ng-compat
+        install -yq glibc libgcc libzstd
 
     # Remove DNF cache (almost 100MB):
     dnf --installroot /root-fs --use-host-config --setopt=install_weak_deps=0 \

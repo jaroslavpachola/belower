@@ -1,0 +1,5 @@
+# The BPF target needs a nightly toolchain to build `core` (-Z build-std).
+[toolchain]
+channel = "nightly-2026-09-30"
+components = ["rust-src"]
+profile = "minimal"

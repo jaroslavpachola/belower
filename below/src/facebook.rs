@@ -24,7 +24,6 @@ use async_trait::async_trait;
 use below_thrift_service::SERVICE_PORT;
 use below_thrift_service_services::make_BelowService_server;
 use cli_usage::UsageMetadata;
-pub use exitstat::ExitstatSkelBuilder;
 pub use fbinit::FacebookInit;
 use srserver::ThriftServer;
 use srserver::ThriftServerBuilder;

@@ -48,8 +48,10 @@ use libbpf_rs::OpenObject;
 use libbpf_rs::skel::OpenSkel as _;
 use libbpf_rs::skel::SkelBuilder as _;
 
+use crate::CgroupBpfHandle;
 use crate::CgroupBpfSkel;
 use crate::CgroupBpfSkelBuilder;
+use crate::CgroupBpfSnapshot;
 
 mod coverage;
 pub(crate) use coverage::*;
