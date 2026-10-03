@@ -1028,9 +1028,11 @@ fn test_dump_queue_content() {
     let jval: Value =
         serde_json::from_slice(&queue_content).expect("Fail parse json of queue dump");
 
+    // The epoch in the local time zone, as the dump prints it.
+    let epoch = common::util::timestamp_to_datetime(&0);
     let expected_json = json!([
         {
-            "Datetime": "1969-12-31 16:00:00",
+            "Datetime": epoch,
             "Interface": "eth0",
             "Queue": "0",
             "RawStats": "stat1=1000, stat2=2000",
@@ -1043,7 +1045,7 @@ fn test_dump_queue_content() {
             "TxUnmaskInterrupt": "5"
         },
         {
-            "Datetime": "1969-12-31 16:00:00",
+            "Datetime": epoch,
             "Interface": "eth0",
             "Queue": "1",
             "RawStats": "stat1=2000, stat2=1000",
@@ -1056,7 +1058,7 @@ fn test_dump_queue_content() {
             "TxUnmaskInterrupt": "50"
         },
         {
-            "Datetime": "1969-12-31 16:00:00",
+            "Datetime": epoch,
             "Interface": "lo",
             "Queue": "1",
             "RawStats": "stat1=2000, stat2=1000",
@@ -1378,9 +1380,11 @@ fn test_dump_tc_content() {
     let jval: Value =
         serde_json::from_slice(&queue_content).expect("Fail parse json of queue dump");
 
+    // The epoch in the local time zone, as the dump prints it.
+    let epoch = common::util::timestamp_to_datetime(&0);
     let expected_json = json!([
         {
-            "Datetime": "1969-12-31 16:00:00",
+            "Datetime": epoch,
             "Interface": "eth0",
             "Kind": "mq",
             "Queue Length": "42",
@@ -1413,7 +1417,7 @@ fn test_dump_tc_content() {
             "Timestamp": "0"
         },
         {
-            "Datetime": "1969-12-31 16:00:00",
+            "Datetime": epoch,
             "Interface": "eth0",
             "Kind": "fq_codel",
             "Queue Length": "42",
