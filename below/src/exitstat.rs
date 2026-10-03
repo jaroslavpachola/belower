@@ -31,14 +31,16 @@ use aya::programs::TracePoint;
 use below_exitstat_common::ABSENT;
 use below_exitstat_common::Event;
 use below_exitstat_common::Offsets;
-use btf_rs::Btf;
-use btf_rs::Type;
-use fallible_iterator::FallibleIterator;
 use nix::poll::PollFd;
 use nix::poll::PollFlags;
 use nix::poll::PollTimeout;
 use slog::debug;
 use slog::warn;
+
+use crate::btf;
+use crate::btf::Btf;
+use crate::btf::Kind;
+use crate::btf::TypeId;
 
 /// The exitstat BPF program, built from exitstat-ebpf by build.rs.
 static EXITSTAT_BPF: &[u8] =
@@ -63,58 +65,59 @@ struct KernelTypes(Btf);
 
 impl KernelTypes {
     /// Follow typedefs and qualifiers to the underlying type.
-    fn strip(&self, mut ty: Type) -> Result<Type> {
+    fn strip(&self, mut id: TypeId) -> Result<&btf::Type> {
         loop {
-            ty = match &ty {
-                Type::Typedef(t) => self.0.resolve_chained_type(t),
-                Type::Const(t) => self.0.resolve_chained_type(t),
-                Type::Volatile(t) => self.0.resolve_chained_type(t),
-                Type::Restrict(t) => self.0.resolve_chained_type(t),
-                Type::TypeTag(t) => self.0.resolve_chained_type(t),
+            let ty = self.0.type_by_id(id)?;
+            match ty.kind {
+                Kind::Alias(target) => id = target,
                 _ => return Ok(ty),
-            }?;
+            }
         }
     }
 
-    fn size_of(&self, ty: &Type) -> Result<u64> {
-        Ok(match self.strip(ty.clone())? {
-            Type::Int(t) => t.size() as u64,
-            Type::Ptr(_) => size_of::<u64>() as u64,
-            Type::Struct(t) | Type::Union(t) => t.size() as u64,
-            Type::Enum(t) => t.size() as u64,
-            Type::Enum64(t) => t.size() as u64,
-            Type::Array(t) => t.len() as u64 * self.size_of(&self.0.resolve_chained_type(&t)?)?,
-            other => bail!("Cannot size a BTF {}", other.name()),
+    fn size_of(&self, id: TypeId) -> Result<u64> {
+        let ty = self.strip(id)?;
+        Ok(match &ty.kind {
+            Kind::Int { size }
+            | Kind::Struct { size, .. }
+            | Kind::Union { size, .. }
+            | Kind::Enum { size, .. }
+            | Kind::Enum64 { size } => *size as u64,
+            Kind::Ptr => size_of::<u64>() as u64,
+            Kind::Array { element, len } => *len as u64 * self.size_of(*element)?,
+            _ => bail!("Cannot size BTF type {id} ({})", ty.name),
         })
     }
 
-    fn named_struct(&self, name: &str) -> Result<Type> {
+    fn named_struct(&self, name: &str) -> Result<TypeId> {
         self.0
-            .resolve_types_by_name(name)?
-            .into_iter()
-            .find(|t| matches!(t, Type::Struct(s) if !s.members.is_empty()))
+            .types()
+            .find(|(_, t)| {
+                t.name == name
+                    && matches!(&t.kind, Kind::Struct { members, .. } if !members.is_empty())
+            })
+            .map(|(id, _)| id)
             .ok_or_else(|| anyhow!("struct {name} is not in the kernel BTF"))
     }
 
-    /// Find `field` in `ty`, looking through anonymous struct and union members
-    /// as C does. Returns its byte offset and type, or None if there is none
-    /// (including when `ty` is not a struct or union at all).
-    fn member(&self, ty: &Type, field: &str) -> Result<Option<(u64, Type)>> {
-        let (Type::Struct(s) | Type::Union(s)) = self.strip(ty.clone())? else {
+    /// Find `field` in type `id`, looking through anonymous struct and union
+    /// members as C does. Returns its byte offset and type, or None if there is
+    /// none (including when `id` is not a struct or union at all).
+    fn member(&self, id: TypeId, field: &str) -> Result<Option<(u64, TypeId)>> {
+        let (Kind::Struct { members, .. } | Kind::Union { members, .. }) = &self.strip(id)?.kind
+        else {
             return Ok(None);
         };
-        for m in &s.members {
-            let name = self.0.resolve_name(m).unwrap_or_default();
-            let member_type = self.0.resolve_chained_type(m)?;
-            if name == field {
-                if m.bitfield_size().unwrap_or(0) != 0 {
+        for m in members {
+            if m.name == field {
+                if m.bitfield_size != 0 {
                     bail!("{field} is a bitfield");
                 }
-                return Ok(Some((m.bit_offset() as u64 / 8, member_type)));
+                return Ok(Some((m.bit_offset as u64 / 8, m.type_id)));
             }
-            if name.is_empty() {
-                if let Some((offset, t)) = self.member(&member_type, field)? {
-                    return Ok(Some((m.bit_offset() as u64 / 8 + offset, t)));
+            if m.name.is_empty() {
+                if let Some((offset, t)) = self.member(m.type_id, field)? {
+                    return Ok(Some((m.bit_offset as u64 / 8 + offset, t)));
                 }
             }
         }
@@ -132,17 +135,16 @@ impl KernelTypes {
                 Some((name, index)) => (name, Some(index.trim_end_matches(']').parse::<u64>()?)),
                 None => (part, None),
             };
-            let Some((member_offset, member_type)) = self.member(&ty, name)? else {
+            let Some((member_offset, member_type)) = self.member(ty, name)? else {
                 return Ok(None);
             };
             offset += member_offset;
             ty = member_type;
             if let Some(index) = index {
-                let Type::Array(array) = self.strip(ty)? else {
+                let Kind::Array { element, .. } = self.strip(ty)?.kind else {
                     bail!("{root}.{path}: {name} is not an array");
                 };
-                let element = self.0.resolve_chained_type(&array)?;
-                offset += index * self.size_of(&element)?;
+                offset += index * self.size_of(element)?;
                 ty = element;
             }
         }
@@ -161,17 +163,14 @@ impl KernelTypes {
     /// Value of an enumerator, searching every enum: the MM_* counters are in
     /// an anonymous one.
     fn enumerator(&self, item: &str) -> Result<u64> {
-        let mut types = self.0.type_iter();
-        while let Some(ty) = types.next()? {
-            if let Type::Enum(e) = ty {
-                for m in &e.members {
-                    if self.0.resolve_name(m)? == item {
-                        return Ok(m.val() as u64);
-                    }
-                }
-            }
-        }
-        bail!("enumerator {item} is not in the kernel BTF")
+        self.0
+            .types()
+            .find_map(|(_, t)| match &t.kind {
+                Kind::Enum { values, .. } => values.iter().find(|v| v.name == item),
+                _ => None,
+            })
+            .map(|v| v.value as u64)
+            .ok_or_else(|| anyhow!("enumerator {item} is not in the kernel BTF"))
     }
 
     /// Everything the exitstat program reads, laid out for this kernel.
@@ -222,8 +221,7 @@ impl KernelTypes {
 
 /// Resolve the exitstat program's offsets for the running kernel.
 fn kernel_offsets() -> Result<Offsets> {
-    let btf = Btf::from_file(KERNEL_BTF)
-        .with_context(|| format!("Failed to read kernel BTF from {KERNEL_BTF}"))?;
+    let btf = Btf::from_file(KERNEL_BTF)?;
     KernelTypes(btf)
         .exitstat_offsets()
         .context("Failed to find the task fields exitstat reads in the kernel BTF")

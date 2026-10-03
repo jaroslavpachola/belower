@@ -66,6 +66,7 @@ use tar::Builder as TarBuilder;
 use tempfile::TempDir;
 use tokio::runtime::Builder as TB;
 
+mod btf;
 mod exitstat;
 #[cfg(test)]
 mod test;

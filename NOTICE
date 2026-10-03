@@ -11,12 +11,3 @@ change; files with substantial changes or new content also carry an
 additional copyright line.
 
 belower is licensed under the Apache License, Version 2.0 (see LICENSE).
-
-Third-party components
-----------------------
-
-belower statically links btf-rs (https://github.com/retis-org/btf-rs), which is
-licensed under the GNU Lesser General Public License, version 2.1 or later.
-Its source code is available at that address and on crates.io. Because
-belower's complete source code is public, you can rebuild belower against a
-modified version of btf-rs.
