@@ -433,6 +433,9 @@ impl View {
             });
         // New samples and key handlers refresh the view themselves, so the
         // periodic tick only needs to rebuild it to show a pending log alert.
+        // The status bar fits its content to the screen width.
+        self.inner
+            .add_global_callback(Event::WindowResize, status_bar::refresh);
         self.inner.add_global_callback(Event::Refresh, |c| {
             if has_log_to_display() {
                 refresh(c);

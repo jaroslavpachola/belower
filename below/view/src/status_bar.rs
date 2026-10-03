@@ -26,10 +26,6 @@ use crate::ViewState;
 use crate::controllers::Controllers;
 use crate::controllers::event_to_string;
 
-fn get_spacing() -> &'static str {
-    "     "
-}
-
 /// How a key is shown in the hints: "q", "space", "^n".
 fn key_label(event: &Event) -> String {
     match event {
@@ -80,58 +76,89 @@ fn key_hints(view_state: &ViewState) -> String {
 }
 
 fn get_content(c: &mut Cursive) -> impl Into<StyledString> + use<> {
+    // Leave room for the panel border.
+    let width = c.screen_size().x.saturating_sub(2);
     let view_state = &c
         .user_data::<ViewState>()
         .expect("No data stored in Cursive object!");
     let datetime = DateTime::<Local>::from(view_state.timestamp);
-    let mut header_str = StyledString::plain(format!(
-        "{}{}",
-        datetime.format("%m/%d/%Y %H:%M:%S UTC%:z"),
-        get_spacing()
-    ));
 
-    header_str.append_plain("Elapsed: ");
+    let mut elapsed = StyledString::plain("Elapsed: ");
     let elapsed_rendered = format!("{}s", view_state.time_elapsed.as_secs(),);
     let lowest = view_state.lowest_time_elapsed.as_secs();
     let this = view_state.time_elapsed.as_secs();
     // 1 second jitter happens pretty often due to integer rounding
     if lowest != 0 && this >= (lowest + 2) {
-        header_str.append_styled(
+        elapsed.append_styled(
             elapsed_rendered,
             cursive::theme::Color::Light(cursive::theme::BaseColor::Red),
         );
     } else {
-        header_str.append_plain(elapsed_rendered);
+        elapsed.append_plain(elapsed_rendered);
     }
 
-    header_str.append_plain(format!(
-        "{}{}{}",
-        get_spacing(),
-        &view_state.system.lock().unwrap().hostname,
-        get_spacing(),
-    ));
-
-    header_str.append_plain(crate::get_version_str());
-    header_str.append_plain(get_spacing());
-    header_str.append_plain(view_state.view_mode_str());
-
+    // (part, priority): when the line does not fit, the spacing narrows and
+    // then the parts with the lowest priority go first, so that the key hints
+    // stay visible on narrow terminals.
+    let mut parts = vec![
+        (
+            StyledString::plain(datetime.format("%m/%d/%Y %H:%M:%S UTC%:z").to_string()),
+            u8::MAX,
+        ),
+        (elapsed, u8::MAX),
+        (
+            StyledString::plain(view_state.system.lock().unwrap().hostname.clone()),
+            1,
+        ),
+        (StyledString::plain(crate::get_version_str()), 0),
+        (StyledString::plain(view_state.view_mode_str()), u8::MAX),
+    ];
     if view_state.width_delta != 0 {
-        header_str.append_plain(format!(
-            "{}[Width: {:+}]",
-            get_spacing(),
-            view_state.width_delta
+        parts.push((
+            StyledString::plain(format!("[Width: {:+}]", view_state.width_delta)),
+            u8::MAX,
         ));
     }
-
     let hints = key_hints(view_state);
     if !hints.is_empty() {
-        header_str.append_plain(get_spacing());
-        header_str.append_styled(
-            hints,
-            cursive::theme::Color::Dark(cursive::theme::BaseColor::Cyan),
-        );
+        parts.push((
+            StyledString::styled(
+                hints,
+                cursive::theme::Color::Dark(cursive::theme::BaseColor::Cyan),
+            ),
+            u8::MAX,
+        ));
+    }
+    parts.retain(|(part, _)| !part.is_empty());
+
+    let line_width = |parts: &[(StyledString, u8)], spacing: usize| {
+        parts.iter().map(|(part, _)| part.width()).sum::<usize>()
+            + spacing * parts.len().saturating_sub(1)
+    };
+    let mut spacing = 5;
+    // A width of 0 means the screen size is not known yet.
+    if width > 0 {
+        while spacing > 2 && line_width(&parts, spacing) > width {
+            spacing -= 1;
+        }
+        for priority in [0, 1] {
+            if line_width(&parts, spacing) > width {
+                parts.retain(|(_, p)| *p != priority);
+            }
+        }
+        // Last, keep only the time of day.
+        if line_width(&parts, spacing) > width {
+            parts[0].0 = StyledString::plain(datetime.format("%H:%M:%S").to_string());
+        }
     }
 
+    let mut header_str = StyledString::new();
+    for (i, (part, _)) in parts.into_iter().enumerate() {
+        if i > 0 {
+            header_str.append_plain(" ".repeat(spacing));
+        }
+        header_str.append(part);
+    }
     header_str
 }
 
