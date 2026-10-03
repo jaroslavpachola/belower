@@ -58,6 +58,9 @@ pub struct ViewRc {
     pub process_view_default_tree: Option<bool>,
     // Shows network tab for open source, by default is false
     pub enable_cgroup_network_tab: Option<bool>,
+    // Use the mouse to select rows and scroll. When not set, defaults to true.
+    // Turning it off lets the terminal select text without holding Shift.
+    pub mouse: Option<bool>,
 }
 
 impl ViewRc {

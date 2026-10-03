@@ -99,6 +99,24 @@ impl TabView {
         })
     }
 
+    /// The tab drawn at column `x`, if any, following the layout in draw().
+    pub fn tab_at(&self, x: usize) -> Option<usize> {
+        let mut start = 0;
+        let mut hidden = self.current_offset_idx;
+        for (idx, tab) in self.tabs.iter().enumerate() {
+            if idx >= self.fixed_tabs && hidden > 0 {
+                hidden -= 1;
+                continue;
+            }
+            let end = start + tab.len();
+            if (start..end).contains(&x) {
+                return Some(idx);
+            }
+            start = end + self.separator.len();
+        }
+        None
+    }
+
     /// Get current selected string.
     pub fn get_cur_selected(&self) -> &String {
         &self.tabs[self.current_selected]

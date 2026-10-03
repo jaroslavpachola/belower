@@ -45,6 +45,11 @@ belower is a standalone project and does not track upstream `below`. So far:
   recording and `dump` at one hour ago unless told otherwise.
 * **Familiar keys.** `j`/`k` move the selection, as in less and vim; jumping
   through time in replay or pause moved from `j`/`J` to `]`/`[`.
+* **Mouse and hints.** Click rows, tabs and column titles (to sort), and
+  scroll with the wheel; the status bar shows the main keys for the current
+  mode. Set `mouse = false` under `[view]` in belowerrc to turn the mouse off.
+* **Faster first screen.** Live mode shows rates after one second rather than
+  `?` for a whole interval.
 
 ## Demo
 

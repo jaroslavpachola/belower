@@ -88,3 +88,4 @@ Supported configuration:
 
 * (optional)`default_view`: String, acceptable value: ["process", "cgroup", "system"] -- Indicate the user default front page
 * (optional)`collapse_cgroups`: bool, acceptable value: [true, false] -- Indicate if a user want to collapse cgroup by default
+* (optional)`mouse`: bool, acceptable value: [true, false], default true -- Use the mouse: click a row to select it, a tab to switch to it, or a column title to sort by it (click again to reverse), and scroll with the wheel. While belower uses the mouse, most terminals select text with Shift held down; set `mouse = false` to select text without it.

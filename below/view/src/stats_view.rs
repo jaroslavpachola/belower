@@ -23,7 +23,10 @@ use cursive::Cursive;
 use cursive::event::Event;
 use cursive::event::EventResult;
 use cursive::event::EventTrigger;
+use cursive::event::MouseButton;
+use cursive::event::MouseEvent;
 use cursive::utils::markup::StyledString;
+use cursive::vec::Vec2;
 use cursive::view::Nameable;
 use cursive::view::Scrollable;
 use cursive::view::View;
@@ -198,6 +201,17 @@ impl<V: 'static + ViewBridge> ViewWrapper for StatsView<V> {
             return self.get_cmd_palette().on_event(ch);
         }
 
+        if let Event::Mouse {
+            offset,
+            position,
+            event: MouseEvent::Press(MouseButton::Left),
+        } = ch
+        {
+            if let Some(result) = self.on_click(position.saturating_sub(offset)) {
+                return result;
+            }
+        }
+
         let controller = self
             .event_controllers
             .lock()
@@ -296,6 +310,42 @@ impl<V: 'static + ViewBridge> StatsView<V> {
             reverse_sort: true,
             event_controllers,
         }
+    }
+
+    /// Handle a left click at `pos` relative to this view: clicking a tab
+    /// switches to it, clicking a column title sorts by that column. Returns
+    /// None for clicks elsewhere, which the inner views handle.
+    fn on_click(&mut self, pos: Vec2) -> Option<EventResult> {
+        // Inside the panel border, the tab bar is the first row and the column
+        // titles the third.
+        let x = pos.x.checked_sub(1)?;
+        match pos.y {
+            1 => {
+                let idx = self.get_tab_view().tab_at(x)?;
+                {
+                    let mut tab_view = self.get_tab_view();
+                    if tab_view.current_selected == idx {
+                        return Some(EventResult::Consumed(None));
+                    }
+                    while tab_view.current_selected != idx {
+                        tab_view.on_tab();
+                    }
+                }
+                self.update_title();
+            }
+            3 => {
+                let idx = self.get_title_view().tab_at(x)?;
+                {
+                    let mut title_view = self.get_title_view();
+                    while title_view.current_selected != idx {
+                        title_view.on_tab();
+                    }
+                }
+                Controllers::SortCol.handle(self, &[]);
+            }
+            _ => return None,
+        }
+        Some(EventResult::with_cb(Self::refresh_myself))
     }
 
     // When a user switch tab, we need to reset the title state.

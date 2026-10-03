@@ -332,12 +332,18 @@ impl ViewState {
 
 impl View {
     pub fn new_with_advance(model: model::Model, mode: ViewMode) -> View {
-        let mut inner = cursive::CursiveRunnable::new(|| {
+        let (viewrc, viewrc_error) = viewrc::ViewRc::new();
+        // The backend turns on mouse capture; leave it on unless belowrc says
+        // otherwise.
+        let mouse = viewrc.mouse.unwrap_or(true);
+        let mut inner = cursive::CursiveRunnable::new(move || {
             let backend = cursive::backends::crossterm::Backend::init();
-            execute!(std::io::stdout(), DisableMouseCapture).expect("Failed to disable mouse.");
+            if !mouse {
+                execute!(std::io::stdout(), DisableMouseCapture)
+                    .expect("Failed to disable mouse.");
+            }
             backend
         });
-        let (viewrc, viewrc_error) = viewrc::ViewRc::new();
         inner.set_user_data(ViewState::new_with_advance(
             MainViewState::Cgroup,
             model,
