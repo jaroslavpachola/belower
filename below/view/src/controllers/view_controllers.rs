@@ -446,7 +446,7 @@ make_event_controller!(
     NextSelectionImpl,
     "next_selection",
     "ns",
-    vec![Event::CtrlChar('n')],
+    vec![Event::CtrlChar('n'), Event::Char('j')],
     |_view: &mut StatsView<T>, _cmd_vec: &[&str]| {},
     |c: &mut Cursive, _cmd_vec: &[&str]| {
         {
@@ -461,7 +461,7 @@ make_event_controller!(
     PrevSelectionImpl,
     "prev_selection",
     "ps",
-    vec![Event::CtrlChar('p')],
+    vec![Event::CtrlChar('p'), Event::Char('k')],
     |_view: &mut StatsView<T>, _cmd_vec: &[&str]| {},
     |c: &mut Cursive, _cmd_vec: &[&str]| {
         {

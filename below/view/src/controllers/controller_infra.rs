@@ -282,6 +282,21 @@ macro_rules! make_controllers {
             }
         }
 
+        /// Every controller's command, command shortcut and default keys.
+        #[cfg(test)]
+        pub fn all_bindings() -> Vec<(&'static str, &'static str, Vec<Event>)> {
+            let mut res = Vec::new();
+            $(
+                $(#[$attr])*
+                res.push((
+                    $struct_item::command(),
+                    $struct_item::cmd_shortcut(),
+                    $struct_item::default_events(),
+                ));
+            )*
+            res
+        }
+
         /// Map the controller enum to event trigger
         pub fn make_event_controller_map(c: &mut Cursive, cmdrc: &Option<Value>) -> HashMap<Event, Controllers> {
             let mut res: HashMap<Event, Controllers> = HashMap::new();

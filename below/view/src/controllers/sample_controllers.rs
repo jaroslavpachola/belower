@@ -23,7 +23,7 @@ make_event_controller!(
     JumpForward,
     "jump_forward",
     "jf",
-    vec![Event::Char('j')],
+    vec![Event::Char(']')],
     |_view: &mut StatsView<T>, _cmd_vec: &[&str]| {},
     |c: &mut Cursive, cmd_vec: &[&str]| {
         let mode = c
@@ -48,7 +48,7 @@ make_event_controller!(
     JumpBackward,
     "jump_backward",
     "jb",
-    vec![Event::Char('J')],
+    vec![Event::Char('[')],
     |_view: &mut StatsView<T>, _cmd_vec: &[&str]| {},
     |c: &mut Cursive, cmd_vec: &[&str]| {
         let mode = c
@@ -72,7 +72,7 @@ make_event_controller!(
 make_event_controller!(
     NextSample,
     "next_sample",
-    "ns",
+    "nsa",
     vec![Event::Char('t')],
     |_view: &mut StatsView<T>, _cmd_vec: &[&str]| {},
     |c: &mut Cursive, _cmd_vec: &[&str]| {
@@ -98,7 +98,7 @@ make_event_controller!(
 make_event_controller!(
     PrevSample,
     "prev_sample",
-    "ps",
+    "psa",
     vec![Event::Char('T')],
     |_view: &mut StatsView<T>, _cmd_vec: &[&str]| {},
     |c: &mut Cursive, _cmd_vec: &[&str]| {

@@ -39,6 +39,12 @@ belower is a standalone project and does not track upstream `below`. So far:
   with the `cgroup-bpf` feature. Without it, belower reads the cgroup files.
 * **Lighter live view.** The view refreshes when a new sample arrives instead
   of rebuilding itself four times a second.
+* **Works without root.** As a regular user, `record`, `replay` and `dump`
+  use per-user paths under `~/.config` and `~/.local/state`, and read the
+  system-wide recordings when you have none. `replay` starts at the latest
+  recording and `dump` at one hour ago unless told otherwise.
+* **Familiar keys.** `j`/`k` move the selection, as in less and vim; jumping
+  through time in replay or pause moved from `j`/`J` to `]`/`[`.
 
 ## Demo
 

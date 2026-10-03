@@ -51,6 +51,8 @@ next_page = 'Y'
 prev_page = 'y'
 increase_width = '1'
 decrease_width = '2'
+next_selection = 'x'
+prev_selection = 'X'
 ";
     let cmdrc_val = toml::from_str::<Value>(cmdrc_str).expect("Failed to parse test cmdrc");
     let event_controllers = make_event_controller_map(&mut fake_view.inner, &Some(cmdrc_val));
@@ -308,7 +310,7 @@ fn test_belowrc_to_event() {
     let belowrc_str = r#"
 [cmd]
 next_tab = 'b'
-cgroup = 'k'
+cgroup = 'K'
 prev_tab = 'c'
 next_col = 'd'
 "#;
@@ -340,7 +342,26 @@ next_col = 'd'
         Some(&Controllers::NextCol)
     );
     assert_eq!(
-        event_controllers.get(&Event::Char('k')),
+        event_controllers.get(&Event::Char('K')),
         Some(&Controllers::Cgroup)
     );
+}
+
+#[test]
+fn test_bindings_are_unique() {
+    let bindings = all_bindings();
+    let mut names = std::collections::HashMap::new();
+    let mut events = std::collections::HashMap::new();
+    for (command, shortcut, default_events) in &bindings {
+        for name in [command, shortcut].into_iter().filter(|n| !n.is_empty()) {
+            if let Some(other) = names.insert(*name, *command) {
+                panic!("{name:?} names both {other} and {command}");
+            }
+        }
+        for event in default_events {
+            if let Some(other) = events.insert(event.clone(), *command) {
+                panic!("{event:?} is bound to both {other} and {command}");
+            }
+        }
+    }
 }
