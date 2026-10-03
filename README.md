@@ -113,6 +113,6 @@ Meta Platforms, Inc. and its contributors. below's name stems from its
 developers rejecting many of [atop](https://linux.die.net/man/1/atop)'s design
 and style decisions; belower goes a little further down.
 
-belower is licensed under the Apache License 2.0, like below. Files changed
-from below are recorded in this repository's git history. See the
-[LICENSE](LICENSE) file.
+belower is licensed under the Apache License 2.0, like below. See the
+[LICENSE](LICENSE) file, and [NOTICE](NOTICE) for attribution, how changes from
+below are recorded, and third-party licenses.
