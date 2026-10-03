@@ -118,6 +118,13 @@ Dump the last hour as CSV:
 $ belower dump system -O csv
 ```
 
+See where your recordings are, how much space they use and what time they
+cover:
+
+```shell
+$ belower store info
+```
+
 See [belower_config.md](docs/belower_config.md) for where belower keeps its
 config, logs and recordings.
 

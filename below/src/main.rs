@@ -342,6 +342,11 @@ Available fields:
         /// list of field IDs to inspect. If empty, read in lines from stdin.
         fields: Vec<model::ModelFieldId>,
     },
+    /// Inspect the store of recordings
+    Store {
+        #[clap(subcommand)]
+        cmd: StoreCommand,
+    },
     /// Print shell completions
     ///
     /// For example:{n}
@@ -357,6 +362,13 @@ Available fields:
         #[clap(short, long, value_parser)]
         output: Option<PathBuf>,
     },
+}
+
+#[derive(Debug, Parser)]
+enum StoreCommand {
+    /// Show where recordings are kept, the space they use and the time they
+    /// cover
+    Info,
 }
 
 #[derive(Debug, Parser)]
@@ -757,7 +769,7 @@ impl Command {
                 host.is_none() && snapshot.is_none()
             }
             Command::Snapshot { host, .. } => host.is_none(),
-            Command::Inspect { .. } => true,
+            Command::Inspect { .. } | Command::Store { .. } => true,
             Command::Debug { cmd } => matches!(
                 cmd,
                 DebugCommand::DumpStore { .. } | DebugCommand::DumpStoreRange { .. }
@@ -1173,6 +1185,15 @@ fn real_main(init: init::InitToken) {
             below_config,
             Service::Off,
             |_, below_config, logger, _| inspect(logger.clone(), below_config, when, fields),
+        ),
+        Command::Store {
+            cmd: StoreCommand::Info,
+        } => run(
+            init,
+            debug,
+            below_config,
+            Service::Off,
+            |_, below_config, logger, _| store_info(logger, &below_config.store_dir),
         ),
         Command::GenerateCompletions { shell, output } => {
             generate_completions(*shell, output.clone())
@@ -1874,6 +1895,53 @@ fn dump_store_range(
         w.flush()?;
     }
 
+    Ok(())
+}
+
+fn store_info(logger: slog::Logger, store_dir: &Path) -> Result<()> {
+    println!("Store:      {}", store_dir.display());
+    if !config::has_recordings(store_dir) {
+        println!(
+            "Recordings: none. Start recording with `belower record`, or set up the \
+            system-wide recorder with `sudo systemctl enable --now belower`."
+        );
+        return Ok(());
+    }
+
+    let mut size = 0;
+    let mut shards = 0;
+    // Shards are named index_<start time in epoch seconds>.
+    let mut oldest_shard = u64::MAX;
+    for entry in fs::read_dir(store_dir)? {
+        let entry = entry?;
+        size += entry.metadata()?.len();
+        if let Some(start) = entry.file_name().to_string_lossy().strip_prefix("index_") {
+            shards += 1;
+            oldest_shard = oldest_shard.min(start.parse().unwrap_or(u64::MAX));
+        }
+    }
+    println!(
+        "Size:       {} in {} daily shard{}",
+        common::util::convert_bytes(size as f64),
+        shards,
+        if shards == 1 { "" } else { "s" }
+    );
+
+    let first = store::read_next_sample(
+        store_dir,
+        SystemTime::UNIX_EPOCH + Duration::from_secs(oldest_shard.min(u32::MAX as u64)),
+        store::Direction::Forward,
+        logger.clone(),
+    )?;
+    let last =
+        store::read_next_sample(store_dir, SystemTime::now(), store::Direction::Reverse, logger)?;
+    if let (Some((first, _)), Some((last, _))) = (first, last) {
+        println!(
+            "Recordings: {} to {}",
+            common::util::systemtime_to_datetime(first),
+            common::util::systemtime_to_datetime(last)
+        );
+    }
     Ok(())
 }
 
