@@ -15,15 +15,68 @@
 use chrono::DateTime;
 use chrono::Local;
 use cursive::Cursive;
+use cursive::event::Event;
 use cursive::utils::markup::StyledString;
 use cursive::view::Nameable;
 use cursive::view::View;
 use cursive::views::TextView;
 
+use crate::ViewMode;
 use crate::ViewState;
+use crate::controllers::Controllers;
+use crate::controllers::event_to_string;
 
 fn get_spacing() -> &'static str {
     "     "
+}
+
+/// How a key is shown in the hints: "q", "space", "^n".
+fn key_label(event: &Event) -> String {
+    match event {
+        Event::Char(' ') => "space".into(),
+        Event::Char(c) => c.to_string(),
+        Event::CtrlChar(c) => format!("^{c}"),
+        other => event_to_string(other),
+    }
+}
+
+/// Hints for the most useful keys in the current mode, using the keys they
+/// are actually bound to (belowrc can remap them).
+fn key_hints(view_state: &ViewState) -> String {
+    let event_controllers = view_state.event_controllers.lock().unwrap();
+    // The shortest label of the keys bound to `controller`, if any.
+    let key = |controller: Controllers| {
+        event_controllers
+            .iter()
+            .filter(|(_, c)| **c == controller)
+            .map(|(event, _)| key_label(event))
+            .min_by(|a, b| a.len().cmp(&b.len()).then_with(|| a.cmp(b)))
+    };
+
+    let mut hints = vec![
+        (key(Controllers::Help), "help"),
+        (key(Controllers::Filter), "filter"),
+        (key(Controllers::SortCol), "sort"),
+    ];
+    let jump = || match (key(Controllers::JForward), key(Controllers::JBackward)) {
+        (Some(forward), Some(backward)) => Some(format!("{forward}/{backward}")),
+        _ => None,
+    };
+    match view_state.mode {
+        ViewMode::Live(_) => hints.push((key(Controllers::Pause), "pause")),
+        ViewMode::Pause(_) => {
+            hints.push((key(Controllers::Pause), "resume"));
+            hints.push((jump(), "jump"));
+        }
+        ViewMode::Replay(_) => hints.push((jump(), "jump")),
+    }
+    hints.push((key(Controllers::Quit), "quit"));
+
+    hints
+        .into_iter()
+        .filter_map(|(key, what)| Some(format!("{}:{what}", key?)))
+        .collect::<Vec<_>>()
+        .join("  ")
 }
 
 fn get_content(c: &mut Cursive) -> impl Into<StyledString> + use<> {
@@ -70,6 +123,15 @@ fn get_content(c: &mut Cursive) -> impl Into<StyledString> + use<> {
         ));
     }
 
+    let hints = key_hints(view_state);
+    if !hints.is_empty() {
+        header_str.append_plain(get_spacing());
+        header_str.append_styled(
+            hints,
+            cursive::theme::Color::Dark(cursive::theme::BaseColor::Cyan),
+        );
+    }
+
     header_str
 }
 
@@ -82,5 +144,8 @@ pub fn refresh(c: &mut Cursive) {
 }
 
 pub fn new(c: &mut Cursive) -> impl View + use<> {
-    TextView::new(get_content(c)).with_name("status_bar")
+    // Cut the line off rather than wrapping it on narrow terminals.
+    TextView::new(get_content(c))
+        .no_wrap()
+        .with_name("status_bar")
 }

@@ -82,6 +82,7 @@ use cursive::views::OnEventView;
 use cursive::views::Panel;
 use cursive::views::ResizedView;
 use cursive::views::ScreensView;
+use cursive::views::TextView;
 use model::CgroupModel;
 #[cfg(fbcode_build)]
 use model::GpuModel;
@@ -378,6 +379,10 @@ impl View {
             .event_controllers
             .lock()
             .unwrap() = event_controller_map;
+        // The status bar's key hints show the keys just mapped.
+        if c.find_name::<TextView>("status_bar").is_some() {
+            status_bar::refresh(c);
+        }
     }
 
     pub fn run(&mut self) -> Result<()> {
