@@ -95,14 +95,16 @@ Record as your own user (no root needed; data goes to
 $ belower record
 ```
 
-Or run the system-wide recording daemon:
+Keep recording in the background with systemd, either system-wide (recording
+to `/var/log/belower/store`) or as your own user service:
 
 ```shell
-$ sudo cp ~/.cargo/bin/belower /bin/belower  # if using cargo-install
-$ sudo cp etc/belower.service /etc/systemd/system
-$ sudo systemctl daemon-reload
-$ sudo systemctl start belower
+$ sudo $(which belower) service install
+$ belower service install --user
 ```
+
+`--dry-run` shows the unit and commands without running them, and
+`belower service uninstall` removes the service again.
 
 Replay historical data, starting from the latest recording or from a given
 time:

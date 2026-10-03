@@ -68,6 +68,7 @@ use tokio::runtime::Builder as TB;
 
 mod btf;
 mod exitstat;
+mod service;
 #[cfg(test)]
 mod test;
 mod watchdog;
@@ -342,6 +343,11 @@ Available fields:
         /// list of field IDs to inspect. If empty, read in lines from stdin.
         fields: Vec<model::ModelFieldId>,
     },
+    /// Install the recorder as a systemd service
+    Service {
+        #[clap(subcommand)]
+        cmd: ServiceCommand,
+    },
     /// Inspect the store of recordings
     Store {
         #[clap(subcommand)]
@@ -362,6 +368,32 @@ Available fields:
         #[clap(short, long, value_parser)]
         output: Option<PathBuf>,
     },
+}
+
+#[derive(Debug, Parser)]
+enum ServiceCommand {
+    /// Write the systemd unit, then enable and start it. System-wide by
+    /// default (needs root), recording to /var/log/belower/store.
+    Install {
+        #[clap(flatten)]
+        opts: ServiceOpts,
+    },
+    /// Stop and disable the service and remove its unit. Recordings are kept.
+    Uninstall {
+        #[clap(flatten)]
+        opts: ServiceOpts,
+    },
+}
+
+#[derive(Debug, Parser)]
+struct ServiceOpts {
+    /// Use your own systemd user instance instead, recording to your
+    /// per-user store; no root needed
+    #[clap(long)]
+    user: bool,
+    /// Only print what would be done
+    #[clap(long)]
+    dry_run: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -1186,6 +1218,24 @@ fn real_main(init: init::InitToken) {
             Service::Off,
             |_, below_config, logger, _| inspect(logger.clone(), below_config, when, fields),
         ),
+        Command::Service { cmd } => {
+            let (action, opts) = match cmd {
+                ServiceCommand::Install { opts } => (service::install as fn(_, _) -> _, opts),
+                ServiceCommand::Uninstall { opts } => (service::uninstall as fn(_, _) -> _, opts),
+            };
+            let scope = if opts.user {
+                service::Scope::User
+            } else {
+                service::Scope::System
+            };
+            match action(scope, opts.dry_run) {
+                Ok(()) => 0,
+                Err(e) => {
+                    eprintln!("Error: {:#}", e);
+                    1
+                }
+            }
+        }
         Command::Store {
             cmd: StoreCommand::Info,
         } => run(
@@ -1902,8 +1952,9 @@ fn store_info(logger: slog::Logger, store_dir: &Path) -> Result<()> {
     println!("Store:      {}", store_dir.display());
     if !config::has_recordings(store_dir) {
         println!(
-            "Recordings: none. Start recording with `belower record`, or set up the \
-            system-wide recorder with `sudo systemctl enable --now belower`."
+            "Recordings: none. Start recording with `belower record`, or keep recording \
+            in the background with `belower service install --user` (or, system-wide, \
+            `sudo belower service install`)."
         );
         return Ok(());
     }

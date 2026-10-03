@@ -32,6 +32,8 @@ WORKDIR /app
 # Only copy over files/dirs needed for the build:
 COPY Cargo.lock Cargo.toml .
 COPY below/ below/
+# `belower service install` embeds etc/belower.service
+COPY etc/ etc/
 RUN <<HEREDOC
     # The nightly toolchain the exitstat BPF program builds with (its rust-toolchain.toml)
     (cd below/exitstat-ebpf && rustup toolchain install)

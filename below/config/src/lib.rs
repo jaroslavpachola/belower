@@ -98,8 +98,9 @@ pub fn ensure_recordings(dir: &Path) -> Result<()> {
     if !has_recordings(dir) {
         bail!(
             "No recordings found in {}.\n\
-            To start recording, run `belower record`, or set up the system-wide \
-            recorder with `sudo systemctl enable --now belower`.",
+            To start recording, run `belower record`, or keep recording in the \
+            background with `belower service install --user` (or, system-wide, \
+            `sudo belower service install`).",
             dir.display()
         );
     }
