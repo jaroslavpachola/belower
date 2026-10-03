@@ -208,12 +208,10 @@ pub static DEFAULT_SYSTEM_FIELDS: &[SystemOptionField] = &[
 
 const SYSTEM_ABOUT: &str = "Dump system stats";
 
-/// Generated about message for System dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for System dump so supported fields are up-to-date.
 static SYSTEM_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {system_fields}
 
@@ -238,7 +236,6 @@ static SYSTEM_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 $ belower dump system -b "08:30:00" -e "08:30:30" -f datetime vm hostname -O csv
 
 "#,
-        about = SYSTEM_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         system_fields = join(enum_iterator::all::<SystemModelFieldId>()),
         agg_cpu_fields = join(SystemAggField::Cpu.expand(false)),
@@ -313,12 +310,10 @@ pub static DEFAULT_DISK_FIELDS: &[DiskOptionField] = &[
 
 const DISK_ABOUT: &str = "Dump disk stats";
 
-/// Generated about message for System dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for System dump so supported fields are up-to-date.
 static DISK_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {disk_fields}
 
@@ -353,7 +348,6 @@ Output stats for top 5 read partitions for each time slice from 08:30:00 to 08:3
 $ belower dump disk -b "08:30:00" -e "08:30:30" -s read_bytes_per_sec --rsort --top 5
 
 "#,
-        about = DISK_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         disk_fields = join(enum_iterator::all::<SingleDiskModelFieldId>()),
         agg_read_fields = join(DiskAggField::Read.expand(false)),
@@ -398,9 +392,7 @@ const BTRFS_ABOUT: &str = "Dump btrfs Stats";
 
 static BTRFS_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {btrfs_fields}
 
@@ -425,7 +417,6 @@ Output stats for top 5 subvolumes for each time slice from 08:30:00 to 08:30:30:
 $ belower dump btrfs -b "08:30:00" -e "08:30:30" -s disk_bytes --rsort --top 5
 
 "#,
-        about = BTRFS_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         btrfs_fields = join(enum_iterator::all::<BtrfsModelFieldId>()),
         agg_disk_usage_fields = join(BtrfsAggField::DiskUsage.expand(false)),
@@ -491,12 +482,10 @@ pub static DEFAULT_PROCESS_FIELDS: &[ProcessOptionField] = &[
 
 const PROCESS_ABOUT: &str = "Dump process stats";
 
-/// Generated about message for Process dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for Process dump so supported fields are up-to-date.
 static PROCESS_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {process_fields}
 
@@ -529,7 +518,6 @@ Output stats for top 5 CPU intense processes for each time slice from 08:30:00 t
 $ belower dump process -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
 
 "#,
-        about = PROCESS_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         process_fields = join(enum_iterator::all::<SingleProcessModelFieldId>()),
         agg_cpu_fields = join(ProcessAggField::Cpu.expand(false)),
@@ -606,12 +594,10 @@ pub static DEFAULT_CGROUP_FIELDS: &[CgroupOptionField] = &[
 
 const CGROUP_ABOUT: &str = "Dump cgroup stats";
 
-/// Generated about message for Cgroup dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for Cgroup dump so supported fields are up-to-date.
 static CGROUP_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {cgroup_fields}
 
@@ -648,7 +634,6 @@ from 08:30:00 to 08:30:30 recursively:
 $ belower dump cgroup -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
 
 "#,
-        about = CGROUP_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         cgroup_fields = join(enum_iterator::all::<SingleCgroupModelFieldId>()),
         agg_cpu_fields = join(CgroupAggField::Cpu.expand(false)),
@@ -739,12 +724,10 @@ pub static DEFAULT_IFACE_FIELDS: &[IfaceOptionField] = &[
 
 const IFACE_ABOUT: &str = "Dump the link layer iface stats";
 
-/// Generated about message for Iface dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for Iface dump so supported fields are up-to-date.
 static IFACE_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {iface_fields}
 
@@ -776,7 +759,6 @@ from 08:30:00 to 08:30:30:
 $ belower dump iface -b "08:30:00" -e "08:30:30" -s interface -F eth* -O json
 
 "#,
-        about = IFACE_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         iface_fields = join(enum_iterator::all::<SingleNetModelFieldId>()),
         agg_rate_fields = join(IfaceAggField::Rate.expand(false)),
@@ -835,12 +817,10 @@ pub static DEFAULT_NETWORK_FIELDS: &[NetworkOptionField] = &[
 
 const NETWORK_ABOUT: &str = "Dump the network layer stats including ip and icmp";
 
-/// Generated about message for Network dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for Network dump so supported fields are up-to-date.
 static NETWORK_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {network_fields}
 
@@ -867,7 +847,6 @@ Example:
 $ belower dump network -b "08:30:00" -e "08:30:30" -f ip ip6 -O json
 
 "#,
-        about = NETWORK_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         network_fields = join(enum_iterator::all::<NetworkModelFieldId>()),
         agg_ip_fields = join(NetworkAggField::Ip.expand(false)),
@@ -921,12 +900,10 @@ pub static DEFAULT_TRANSPORT_FIELDS: &[TransportOptionField] = &[
 
 const TRANSPORT_ABOUT: &str = "Dump the transport layer stats including tcp and udp";
 
-/// Generated about message for Transport dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for Transport dump so supported fields are up-to-date.
 static TRANSPORT_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, {network_fields}.
 
@@ -951,7 +928,6 @@ Example:
 $ belower dump transport -b "08:30:00" -e "08:30:30" -f tcp udp -O json
 
 "#,
-        about = TRANSPORT_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         network_fields = join(enum_iterator::all::<NetworkModelFieldId>()),
         agg_tcp_fields = join(TransportAggField::Tcp.expand(false)),
@@ -1005,12 +981,10 @@ pub static DEFAULT_ETHTOOL_QUEUE_FIELDS: &[EthtoolQueueOptionField] = &[
 
 const ETHTOOL_QUEUE_ABOUT: &str = "Dump network interface queue stats";
 
-/// Generated about message for Ethtool Queue dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for Ethtool Queue dump so supported fields are up-to-date.
 static ETHTOOL_QUEUE_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 
 {common_fields}, and expanded fields below.
 
@@ -1031,7 +1005,6 @@ Example:
 $ belower dump ethtool-queue -b "08:30:00" -e "08:30:30" -O json
 
 "#,
-        about = ETHTOOL_QUEUE_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         agg_queue_fields = join(EthtoolQueueAggField::Queue.expand(false)),
         default_fields = join(DEFAULT_ETHTOOL_QUEUE_FIELDS.to_owned()),
@@ -1092,11 +1065,10 @@ pub static DEFAULT_TC_FIELDS: &[TcOptionField] = &[
 
 const TC_ABOUT: &str = "Dump the tc related stats with qdiscs";
 
-/// Generated about message for tc (traffic control) dump so supported fields are up-to-date.
+/// Generated help (shown after the options) for tc (traffic control) dump so supported fields are up-to-date.
 static TC_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
     format!(
-        r#"{about}
-********************** Available fields **********************
+        r#"********************** Available fields **********************
 {common_fields}, {tc_fields}.
 ********************** Aggregated fields **********************
 * --detail: no effect.
@@ -1106,7 +1078,6 @@ static TC_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 Example:
 $ belower dump tc -b "08:30:00" -e "08:30:30" -O json
 "#,
-        about = TC_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
         tc_fields = join(enum_iterator::all::<SingleTcModelFieldId>()),
         default_fields = join(DEFAULT_TC_FIELDS.to_owned()),
@@ -1130,7 +1101,7 @@ pub struct GeneralOpt {
     /// Show all fields. If --everything is specified, --fields and --default are overridden.
     #[clap(long)]
     pub everything: bool,
-    /// Show more infomation other than default.
+    /// Show more information than the default.
     #[clap(short, long)]
     pub detail: bool,
     /// Begin time, same format as replay
@@ -1182,9 +1153,10 @@ pub struct GeneralOpt {
 
 #[derive(Debug, Parser, Clone)]
 pub enum DumpCommand {
-    #[clap(about = SYSTEM_ABOUT, long_about = SYSTEM_LONG_ABOUT.as_str())]
+    #[clap(about = SYSTEM_ABOUT, after_long_help = SYSTEM_LONG_ABOUT.as_str())]
     System {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<SystemOptionField>>,
         #[clap(flatten)]
@@ -1193,9 +1165,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = DISK_ABOUT, long_about = DISK_LONG_ABOUT.as_str())]
+    #[clap(about = DISK_ABOUT, after_long_help = DISK_LONG_ABOUT.as_str())]
     Disk {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<DiskOptionField>>,
         #[clap(flatten)]
@@ -1207,9 +1180,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = BTRFS_ABOUT, long_about = BTRFS_LONG_ABOUT.as_str())]
+    #[clap(about = BTRFS_ABOUT, after_long_help = BTRFS_LONG_ABOUT.as_str())]
     Btrfs {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long)]
         fields: Option<Vec<BtrfsOptionField>>,
         #[clap(flatten)]
@@ -1221,9 +1195,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = PROCESS_ABOUT, long_about = PROCESS_LONG_ABOUT.as_str())]
+    #[clap(about = PROCESS_ABOUT, after_long_help = PROCESS_LONG_ABOUT.as_str())]
     Process {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<ProcessOptionField>>,
         #[clap(flatten)]
@@ -1235,9 +1210,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = CGROUP_ABOUT, long_about = CGROUP_LONG_ABOUT.as_str())]
+    #[clap(about = CGROUP_ABOUT, after_long_help = CGROUP_LONG_ABOUT.as_str())]
     Cgroup {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<CgroupOptionField>>,
         #[clap(flatten)]
@@ -1249,9 +1225,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = IFACE_ABOUT, long_about = IFACE_LONG_ABOUT.as_str())]
+    #[clap(about = IFACE_ABOUT, after_long_help = IFACE_LONG_ABOUT.as_str())]
     Iface {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<IfaceOptionField>>,
         #[clap(flatten)]
@@ -1263,9 +1240,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = NETWORK_ABOUT, long_about = NETWORK_LONG_ABOUT.as_str())]
+    #[clap(about = NETWORK_ABOUT, after_long_help = NETWORK_LONG_ABOUT.as_str())]
     Network {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<NetworkOptionField>>,
         #[clap(flatten)]
@@ -1274,9 +1252,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = TRANSPORT_ABOUT, long_about = TRANSPORT_LONG_ABOUT.as_str())]
+    #[clap(about = TRANSPORT_ABOUT, after_long_help = TRANSPORT_LONG_ABOUT.as_str())]
     Transport {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<TransportOptionField>>,
         #[clap(flatten)]
@@ -1285,9 +1264,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = ETHTOOL_QUEUE_ABOUT, long_about = ETHTOOL_QUEUE_LONG_ABOUT.as_str())]
+    #[clap(about = ETHTOOL_QUEUE_ABOUT, after_long_help = ETHTOOL_QUEUE_LONG_ABOUT.as_str())]
     EthtoolQueue {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long, num_args = 1..)]
         fields: Option<Vec<EthtoolQueueOptionField>>,
         #[clap(flatten)]
@@ -1296,9 +1276,10 @@ pub enum DumpCommand {
         #[clap(long, short, conflicts_with("fields"))]
         pattern: Option<String>,
     },
-    #[clap(about = TC_ABOUT, long_about = TC_LONG_ABOUT.as_str())]
+    #[clap(about = TC_ABOUT, after_long_help = TC_LONG_ABOUT.as_str())]
     Tc {
-        /// Select which fields to display and in what order.
+        /// Select which fields to display and in what order. See the list of
+        /// fields after the options in --help.
         #[clap(short, long)]
         fields: Option<Vec<TcOptionField>>,
         #[clap(flatten)]

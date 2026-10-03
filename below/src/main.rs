@@ -342,11 +342,16 @@ Available fields:
         /// list of field IDs to inspect. If empty, read in lines from stdin.
         fields: Vec<model::ModelFieldId>,
     },
-    /// Generate a shell completions file
-    #[clap(hide = true)]
+    /// Print shell completions
+    ///
+    /// For example:{n}
+    ///   belower completions bash > ~/.local/share/bash-completion/completions/belower{n}
+    ///   belower completions zsh > ~/.zfunc/_belower{n}
+    ///   belower completions fish > ~/.config/fish/completions/belower.fish
+    #[clap(name = "completions", alias = "generate-completions")]
     GenerateCompletions {
-        /// The shell type
-        #[clap(short, long, default_value = "bash")]
+        /// The shell to complete for
+        #[clap(value_enum)]
         shell: Shell,
         /// Output file, stdout if not present
         #[clap(short, long, value_parser)]
