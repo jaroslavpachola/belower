@@ -1630,6 +1630,9 @@ fn live_local(
     thread::Builder::new()
         .name("live_collector".to_owned())
         .spawn(move || {
+            // Rates need two samples, so take the second one soon rather than
+            // showing "?" for a whole interval.
+            let mut wait = interval.min(Duration::from_secs(1));
             loop {
                 if !bpf_err_warned {
                     bpf_err_warned = check_for_exitstat_errors(
@@ -1641,7 +1644,7 @@ fn live_local(
                 }
 
                 // Rely on timeout to guarantee interval between samples
-                match errs.recv_timeout(interval) {
+                match errs.recv_timeout(wait) {
                     Ok(e) => {
                         error!(logger, "{:#}", e);
                         sink.send(Box::new(|c| c.quit()))
@@ -1656,6 +1659,7 @@ fn live_local(
                     }
                     Err(RecvTimeoutError::Timeout) => {}
                 };
+                wait = interval;
 
                 match collector.collect_and_update_model() {
                     Ok(model) => {
