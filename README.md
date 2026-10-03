@@ -1,22 +1,17 @@
-<div align="center">
-  <p>
-    <img width=300 src="https://github.com/facebookincubator/below/blob/main/img/below_logo_horizontal.png" align="center" alt="Below" />
-  </p>
-</div>
+# belower
 
 <div align="center">
   <p>
-    <a href="https://matrix.to/#/#below:matrix.org">
-      <img alt="Matrix chat" src="https://img.shields.io/matrix/below:matrix.org" />
-    </a>
-    <a href="https://github.com/facebookincubator/below/actions?query=workflow%3ACI+branch%3Amain+">
-      <img alt="CI" src="https://github.com/facebookincubator/below/workflows/CI/badge.svg" />
+    <a href="https://github.com/jaroslavpachola/belower/actions/workflows/ci.yml">
+      <img alt="CI" src="https://github.com/jaroslavpachola/belower/actions/workflows/ci.yml/badge.svg" />
     </a>
   </p>
 </div>
 
-`below` is an interactive tool to view and record historical system data. It
-has support for:
+**A C-free, more ergonomic [below](https://github.com/facebookincubator/below).**
+
+`belower` is an interactive tool to view and record historical system data,
+forked from Meta's `below`. It has support for:
 
 * information regarding hardware resource utilization
 * viewing the cgroup hierarchy
@@ -28,12 +23,26 @@ has support for:
 * `dump` subcommand to report script-friendly information (eg JSON, CSV, OpenMetrics, etc.)
 * `snapshot` subcommand to create a replayable snapshot file of historical system data
 
-below does **not** have support for cgroup1.
+belower does **not** have support for cgroup1.
 
-The name "below" stems from the fact that the below developers rejected many
-of [atop](https://linux.die.net/man/1/atop)'s design and style decisions.
+## Differences from below
+
+belower is a standalone project and does not track upstream `below`. So far:
+
+* **No C in the default build.** The exitstat BPF program, which records
+  processes that exit between samples, is written in Rust and loaded with
+  [aya](https://aya-rs.dev). Instead of CO-RE, belower reads the running
+  kernel's BTF at startup and computes the field offsets the program needs.
+  The build no longer needs clang, libelf, zlib or libbpf; zstd is the only C
+  dependency left.
+* **BPF cgroup stats are optional.** below's C cgroup BPF reader is built only
+  with the `cgroup-bpf` feature. Without it, belower reads the cgroup files.
+* **Lighter live view.** The view refreshes when a new sample arrives instead
+  of rebuilding itself four times a second.
 
 ## Demo
+
+This recording shows below's UI, which belower shares:
 
 <a href="https://asciinema.org/a/355506">
 <img src="https://asciinema.org/a/355506.svg" width="500">
@@ -41,94 +50,50 @@ of [atop](https://linux.die.net/man/1/atop)'s design and style decisions.
 
 ## Installing
 
-### Fedora
+belower is not packaged by any distribution yet. Distribution packages named
+`below` install upstream below, not belower.
 
-`below` is packaged in Fedora as of Fedora 34, and can be installed with:
-
-```shell
-sudo dnf install below
-```
-
-Optionally, the systemd service for persistent data collection can also be
-enabled with:
+First, install the dependencies listed in [building.md](docs/building.md).
+Then:
 
 ```shell
-sudo systemctl enable --now below
+$ cargo install --git https://github.com/jaroslavpachola/belower belower
+$ belower --help
 ```
 
-### Alpine Linux
+When working from a checkout, always use release builds (`cargo build
+--release`, `cargo run --release`). Debug builds are several times slower and
+make the live view use noticeably more CPU.
 
-`below` is packaged in Alpine Linux - it's available in v3.17+ and Edge. It can
-be installed with:
-
-```shell
-sudo apk add below
-```
-
-Optionally, the OpenRC service for persistent data collection can also be
-enabled with:
-
-```shell
-sudo rc-service below start
-sudo rc-update add below
-```
-
-### Gentoo Linux
-`below` is available in the
-[`sys-process/below`](https://packages.gentoo.org/packages/sys-process/below)
-package and can be installed with `emerge`:
-
-```shell
-sudo emerge sys-process/below
-```
-
-### Amazon Linux
-
-`below` is packaged in Amazon Linux as of [AL2023.9](https://docs.aws.amazon.com/linux/al2023/release-notes/all-packages-AL2023.9.html), and can be installed with:
-
-```shell
-sudo dnf install below
-```
-
-## Installing from source
-
-First, install dependencies listed in [building.md](docs/building.md).
-
-```shell
-$ cargo install below
-$ below --help
-```
-
-For convenience, we also provide a Dockerfile and
-[pre-built images](https://hub.docker.com/r/below/below) on Docker Hub.
-See [docker.md](docs/docker.md) for how to use them.
+To run belower in a container, see [docker.md](docs/docker.md).
 
 ## Quickstart
 
 Live view of system:
 
 ```shell
-$ sudo below live
+$ sudo belower live
 ```
 
 Run recording daemon:
 
 ```shell
-$ sudo cp ~/.cargo/bin/below /bin/below  # if using cargo-install
-$ sudo cp etc/below.service /etc/systemd/system
+$ sudo cp ~/.cargo/bin/belower /bin/belower  # if using cargo-install
+$ sudo cp etc/belower.service /etc/systemd/system
 $ sudo systemctl daemon-reload
-$ sudo systemctl start below
+$ sudo systemctl start belower
 ```
 
 Replay historical data:
 
 ```shell
-$ below replay -t "3m ago"
+$ belower replay -t "3m ago"
 ```
 
 ## Integration with Prometheus/Grafana
 
-`below` has basic support for Prometheus/Grafana through the `dump` interface.
+`belower` has basic support for Prometheus/Grafana through the `dump`
+interface.
 
 See [contrib/grafana/](contrib/grafana) for more details.
 
@@ -141,6 +106,13 @@ with alternative tools.
 
 See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
 
-## License
+## Credits and license
 
-See [LICENSE](LICENSE) file.
+belower is based on [below](https://github.com/facebookincubator/below) by
+Meta Platforms, Inc. and its contributors. below's name stems from its
+developers rejecting many of [atop](https://linux.die.net/man/1/atop)'s design
+and style decisions; belower goes a little further down.
+
+belower is licensed under the Apache License 2.0, like below. Files changed
+from below are recorded in this repository's git history. See the
+[LICENSE](LICENSE) file.
