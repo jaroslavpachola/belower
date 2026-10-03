@@ -91,6 +91,7 @@ open_source_shim!();
 static LIVE_REMOTE_MAX_LATENCY_SEC: u64 = 10;
 
 #[derive(Debug, Parser)]
+#[clap(version)]
 struct Opt {
     /// Config file [default: /etc/belower/belower.conf as root,
     /// ~/.config/belower/belower.conf otherwise]

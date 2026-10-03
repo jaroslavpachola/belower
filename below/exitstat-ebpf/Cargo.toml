@@ -3,7 +3,7 @@
 
 [package]
 name = "below-exitstat-ebpf"
-version = "0.11.0"
+version = "0.12.0"
 authors = ["Meta Platforms, Inc. and affiliates", "Jaroslav Pachola"]
 edition = "2024"
 description = "below's exitstat BPF program"

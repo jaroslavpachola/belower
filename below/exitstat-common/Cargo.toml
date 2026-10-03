@@ -1,6 +1,6 @@
 [package]
 name = "below-exitstat-common"
-version = "0.11.0"
+version = "0.12.0"
 authors = ["Jaroslav Pachola"]
 edition = "2024"
 description = "Data layout shared by below's exitstat BPF program and its loader"

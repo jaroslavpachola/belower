@@ -66,6 +66,22 @@ This recording shows below's UI, which belower shares:
 belower is not packaged by any distribution yet. Distribution packages named
 `below` install upstream below, not belower.
 
+### Prebuilt binaries
+
+Each [release](https://github.com/jaroslavpachola/belower/releases) has
+binaries for x86_64 and aarch64 Linux with glibc 2.34 or later (for example
+Ubuntu 22.04, Debian 12, Fedora 35, RHEL 9 and newer):
+
+```shell
+$ version=v0.12.0 arch=$(uname -m)
+$ curl -LO https://github.com/jaroslavpachola/belower/releases/download/$version/belower-$version-$arch-linux-gnu.tar.gz
+$ tar xzf belower-$version-$arch-linux-gnu.tar.gz
+$ sudo install belower-$version-$arch-linux-gnu/belower /usr/local/bin/
+$ belower --version
+```
+
+### From source
+
 First, install the dependencies listed in [building.md](docs/building.md).
 Then:
 
