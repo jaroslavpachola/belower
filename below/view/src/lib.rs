@@ -60,6 +60,7 @@ use std::time::SystemTime;
 
 use anyhow::Result;
 use common::logutil::get_last_log_to_display;
+use common::logutil::has_log_to_display;
 use common::open_source_shim;
 use common::util::get_belowrc_cmd_section_key;
 use common::util::get_belowrc_filename;
@@ -192,9 +193,9 @@ pub enum ViewMode {
     Replay(Arc<Mutex<Advance>>),
 }
 
-// Invoked either when the data view was explicitly advanced, or
-// periodically (during live mode)
-fn refresh(c: &mut Cursive) {
+// Invoked when the data view was advanced (including each new live sample),
+// and periodically when a log alert is pending
+pub fn refresh(c: &mut Cursive) {
     let width_delta = c
         .user_data::<ViewState>()
         .expect("No data stored in Cursive object!")
@@ -347,7 +348,8 @@ impl View {
     }
 
     pub fn cb_sink(&mut self) -> &::cursive::CbSink {
-        self.inner.set_fps(4);
+        // Drives the Event::Refresh tick, which surfaces pending log alerts.
+        self.inner.set_fps(1);
         self.inner.cb_sink()
     }
 
@@ -417,8 +419,12 @@ impl View {
                 // Use WindowResize event to force redraw everything.
                 c.on_event(Event::WindowResize);
             });
+        // New samples and key handlers refresh the view themselves, so the
+        // periodic tick only needs to rebuild it to show a pending log alert.
         self.inner.add_global_callback(Event::Refresh, |c| {
-            refresh(c);
+            if has_log_to_display() {
+                refresh(c);
+            }
         });
         self.inner.add_global_callback(Event::CtrlChar('r'), |c| {
             c.clear();

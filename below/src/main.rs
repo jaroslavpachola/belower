@@ -1608,6 +1608,7 @@ fn live_local(
                             // When paused, no need to update model
                             if !view_state.is_paused() {
                                 view_state.update(model);
+                                view::refresh(s);
                             }
                         });
                         if sink.send(data_plane).is_err() {
@@ -1678,7 +1679,8 @@ fn live_remote(
                             .expect("Lock failed")
                             .advance(store::Direction::Forward)
                     {
-                        view_state.update(data)
+                        view_state.update(data);
+                        view::refresh(s);
                     }
                 });
                 if sink.send(data_plane).is_err() {

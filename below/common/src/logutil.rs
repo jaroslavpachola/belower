@@ -53,6 +53,10 @@ pub struct CPMsgRecord {
 }
 
 impl CPMsgRecord {
+    pub fn has_msg(&self) -> bool {
+        !self.consumed
+    }
+
     pub fn get_msg(&mut self) -> Option<String> {
         if self.consumed {
             None
@@ -103,6 +107,14 @@ pub fn get_last_log_to_display() -> Option<String> {
         .lock()
         .expect("Fail to acquire lock for LAST_LOG_TO_DISPLAY")
         .get_msg()
+}
+
+/// Whether a log message is waiting to be displayed, without consuming it.
+pub fn has_log_to_display() -> bool {
+    LAST_LOG_TO_DISPLAY
+        .lock()
+        .expect("Fail to acquire lock for LAST_LOG_TO_DISPLAY")
+        .has_msg()
 }
 
 pub struct CompoundDecorator<W: io::Write, T: io::Write> {

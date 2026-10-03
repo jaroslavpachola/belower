@@ -49,6 +49,7 @@ make_event_controller!(
         c.user_data::<ViewState>()
             .expect("No data stored in Cursive object!")
             .main_view_state = MainViewState::Gpu;
+        refresh(c)
     }
 );
 

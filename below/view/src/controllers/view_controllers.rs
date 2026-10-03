@@ -183,6 +183,7 @@ make_event_controller!(
         c.user_data::<ViewState>()
             .expect("No data stored in Cursive object!")
             .main_view_state = MainViewState::Process(ProcessZoomState::NoZoom);
+        refresh(c)
     }
 );
 
@@ -213,6 +214,7 @@ make_event_controller!(
         c.user_data::<ViewState>()
             .expect("No data stored in Cursive object!")
             .main_view_state = MainViewState::Cgroup;
+        refresh(c)
     }
 );
 
@@ -243,6 +245,7 @@ make_event_controller!(
         c.user_data::<ViewState>()
             .expect("No data stored in Cursive object!")
             .main_view_state = MainViewState::System;
+        refresh(c)
     }
 );
 
