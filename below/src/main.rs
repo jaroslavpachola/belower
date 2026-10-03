@@ -91,8 +91,11 @@ static LIVE_REMOTE_MAX_LATENCY_SEC: u64 = 10;
 
 #[derive(Debug, Parser)]
 struct Opt {
-    #[clap(long, value_parser, default_value = config::BELOW_DEFAULT_CONF)]
-    config: PathBuf,
+    /// Config file [default: /etc/belower/belower.conf as root,
+    /// ~/.config/belower/belower.conf otherwise]
+    #[clap(long, value_parser)]
+    config: Option<PathBuf>,
+    /// Log debug messages
     #[clap(short, long)]
     debug: bool,
     #[clap(subcommand)]
@@ -248,10 +251,11 @@ enum Command {
         /// Relative: {humantime} ago, e.g. "2 days 3 hr 15m 10sec ago"{n}
         /// Relative short: Mixed {time_digit}{time_unit_char} E.g. 10m, 3d2h, 5h30s. Case insensitive.{n}
         /// Absolute: "Jan 01 23:59", "01/01/1970 11:59PM", "1970-01-01 23:59:59"{n}
-        /// Unix Epoch: 1589808367
+        /// Unix Epoch: 1589808367{n}
+        /// Default: the latest recording (the start, with --snapshot)
         /// _
         #[clap(short, long, verbatim_doc_comment)]
-        time: String,
+        time: Option<String>,
         /// Supply hostname to activate remote viewing. Custom identifiers
         /// may also be resolved to the hostname at the requested time.
         #[clap(short = 's', long)]
@@ -740,6 +744,24 @@ impl std::fmt::Display for StopSignal {
     }
 }
 
+impl Command {
+    /// Whether the command reads recordings from the local store.
+    fn reads_local_store(&self) -> bool {
+        match self {
+            Command::Replay { host, snapshot, .. } | Command::Dump { host, snapshot, .. } => {
+                host.is_none() && snapshot.is_none()
+            }
+            Command::Snapshot { host, .. } => host.is_none(),
+            Command::Inspect { .. } => true,
+            Command::Debug { cmd } => matches!(
+                cmd,
+                DebugCommand::DumpStore { .. } | DebugCommand::DumpStoreRange { .. }
+            ),
+            _ => false,
+        }
+    }
+}
+
 pub fn run<F>(
     init: init::InitToken,
     debug: bool,
@@ -800,9 +822,8 @@ where
             0
         }
         Err(e) => {
-            if logutil::get_current_log_target() == logutil::TargetLog::File {
-                logutil::set_current_log_target(logutil::TargetLog::All);
-            }
+            // Keep the banner in the log file; on the terminal, the error alone.
+            logutil::set_current_log_target(logutil::TargetLog::File);
             error!(
                 logger,
                 "\n\
@@ -811,6 +832,7 @@ where
                 -------------------------------------------------------------",
                 e
             );
+            eprintln!("Error: {:#}", e);
             1
         }
     }
@@ -830,18 +852,6 @@ fn main() {
 fn real_main(init: init::InitToken) {
     let opts = Opt::parse();
     let debug = opts.debug;
-    config::BELOW_CONFIG
-        .set(match BelowConfig::load(&opts.config) {
-            Ok(c) => c,
-            Err(e) => {
-                eprintln!("{:#}", e);
-                exit(1);
-            }
-        })
-        .expect("BELOW_CONFIG singleton set twice");
-    let below_config = config::BELOW_CONFIG
-        .get()
-        .expect("BELOW_CONFIG empty after set");
 
     // Use live mode as default
     let cmd = opts.cmd.as_ref().unwrap_or(&Command::Live {
@@ -849,6 +859,32 @@ fn real_main(init: init::InitToken) {
         host: None,
         port: None,
     });
+
+    let config_path = opts
+        .config
+        .clone()
+        .unwrap_or_else(|| config::Locations::current().config);
+    let mut below_config = match BelowConfig::load(&config_path) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("{:#}", e);
+            exit(1);
+        }
+    };
+    // Without root, recordings go to a per-user store. Let users who have
+    // none read what the system-wide recorder wrote.
+    if cmd.reads_local_store() && below_config.fall_back_to_system_store() {
+        eprintln!(
+            "No recordings of your own; reading the system-wide recordings in {}",
+            below_config.store_dir.display()
+        );
+    }
+    config::BELOW_CONFIG
+        .set(below_config)
+        .expect("BELOW_CONFIG singleton set twice");
+    let below_config = config::BELOW_CONFIG
+        .get()
+        .expect("BELOW_CONFIG empty after set");
     let rc = match cmd {
         Command::External(command) => commands::run_command(init, debug, below_config, command),
         Command::Live {
@@ -938,10 +974,7 @@ fn real_main(init: init::InitToken) {
                 |init, below_config, logger, errs| {
                     let (host, snapshot) =
                         commands::find_snapshot(init, source, host, snapshot, || {
-                            let timestamp = cliutil::system_time_from_date_and_adjuster(
-                                time.as_str(),
-                                days_adjuster.as_deref(),
-                            )?;
+                            let timestamp = replay_start(time.as_deref(), &days_adjuster, false)?;
                             Ok((timestamp, timestamp))
                         })?;
                     let (snapshot, _download) = commands::fetch_snapshot(init, snapshot)?;
@@ -1122,6 +1155,9 @@ fn real_main(init: init::InitToken) {
                             )
                         })?;
                     let (snapshot, _download) = commands::fetch_snapshot(init, snapshot)?;
+                    if host.is_none() && snapshot.is_none() {
+                        config::ensure_recordings(&store_dir)?;
+                    }
                     dump::run(logger, errs, store_dir, host, port, snapshot, cmd)
                 },
             )
@@ -1193,21 +1229,37 @@ fn inspect(
     Ok(())
 }
 
+/// Where replay starts: the requested time, or by default the latest
+/// recording (the earliest, when replaying a snapshot).
+fn replay_start(
+    time: Option<&str>,
+    days_adjuster: &Option<String>,
+    snapshot: bool,
+) -> Result<SystemTime> {
+    match time {
+        Some(time) => cliutil::system_time_from_date_and_adjuster(time, days_adjuster.as_deref()),
+        // jump_sample_to() goes to the first sample at or after the time, or
+        // the last one if there is none.
+        None if snapshot => Ok(SystemTime::UNIX_EPOCH),
+        None => Ok(SystemTime::now()),
+    }
+}
+
 fn replay(
     logger: slog::Logger,
     errs: Receiver<Error>,
-    time: String,
+    time: Option<String>,
     below_config: &BelowConfig,
     host: Option<String>,
     port: Option<u16>,
     days_adjuster: Option<String>,
     snapshot: Option<String>,
 ) -> Result<()> {
-    let timestamp =
-        cliutil::system_time_from_date_and_adjuster(time.as_str(), days_adjuster.as_deref())?;
+    let timestamp = replay_start(time.as_deref(), &days_adjuster, snapshot.is_some())?;
 
     let mut advance = match (host, snapshot) {
         (None, None) => {
+            config::ensure_recordings(&below_config.store_dir)?;
             new_advance_local(logger.clone(), below_config.store_dir.clone(), timestamp)
         }
         (Some(host), None) => {
@@ -1240,7 +1292,7 @@ fn replay(
             "No initial sample could be found!\n\
             You may have provided a time in the future or no data was recorded during the provided time. \
             Please check your input and timezone.\n\
-            If you are using remote, please make sure the below service on target host is running."
+            If you are using remote, please make sure the belower service on target host is running."
         ),
     };
 
@@ -1940,6 +1992,9 @@ fn snapshot(
         duration.as_deref(),
         /* days_adjuster */ None,
     )?;
+    if host.is_none() {
+        config::ensure_recordings(&below_config.store_dir)?;
+    }
     if let Some(uploader) = commands::snapshot_uploader(init, upload, time_begin, time_end)? {
         return upload_snapshot(
             logger,

@@ -75,7 +75,14 @@ Live view of system:
 $ sudo belower live
 ```
 
-Run recording daemon:
+Record as your own user (no root needed; data goes to
+`~/.local/state/belower/store`):
+
+```shell
+$ belower record
+```
+
+Or run the system-wide recording daemon:
 
 ```shell
 $ sudo cp ~/.cargo/bin/belower /bin/belower  # if using cargo-install
@@ -84,11 +91,22 @@ $ sudo systemctl daemon-reload
 $ sudo systemctl start belower
 ```
 
-Replay historical data:
+Replay historical data, starting from the latest recording or from a given
+time:
 
 ```shell
+$ belower replay
 $ belower replay -t "3m ago"
 ```
+
+Dump the last hour as CSV:
+
+```shell
+$ belower dump system -O csv
+```
+
+See [belower_config.md](docs/belower_config.md) for where belower keeps its
+config, logs and recordings.
 
 ## Integration with Prometheus/Grafana
 

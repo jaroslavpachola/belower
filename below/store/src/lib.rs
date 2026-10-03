@@ -304,7 +304,7 @@ impl StoreWriter {
         format: Format,
     ) -> Result<Self> {
         if !path.as_ref().is_dir() {
-            std::fs::create_dir(&path).with_context(|| {
+            std::fs::create_dir_all(&path).with_context(|| {
                 format!("Failed to create store path: {}", path.as_ref().display())
             })?;
         }

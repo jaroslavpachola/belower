@@ -13,6 +13,7 @@ license = "Apache-2.0"
 anyhow = "1.0.104"
 btrfs = { package = "below-btrfs", version = "0.11.0", path = "../btrfs" }
 cgroupfs = { version = "0.11.0", path = "../cgroupfs" }
+libc = "0.2.186"
 procfs = { package = "fb_procfs", version = "0.11.0", path = "../procfs" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 toml = { version = "1.1.6", features = ["preserve_order"] }

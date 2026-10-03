@@ -33,6 +33,11 @@ fn setup_log(_init: InitToken, file: std::fs::File, _debug: bool) -> slog::Logge
 }
 
 pub fn setup(init: InitToken, path: PathBuf, debug: bool) -> slog::Logger {
+    // The per-user log directory may not exist yet. If it cannot be
+    // created, opening the file fails below and we log to a tempfile.
+    if let Some(dir) = path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
     let file = match OpenOptions::new().create(true).append(true).open(path) {
         Ok(f) => f,
         Err(_) => {

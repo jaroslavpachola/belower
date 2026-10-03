@@ -21,11 +21,9 @@ use super::*;
 #[test]
 fn test_config_default() {
     let below_config: BelowConfig = Default::default();
-    assert_eq!(below_config.log_dir, std::env::temp_dir());
-    assert_eq!(
-        below_config.store_dir.to_string_lossy(),
-        "/var/log/belower/store"
-    );
+    let locations = Locations::current();
+    assert_eq!(below_config.log_dir, locations.log_dir);
+    assert_eq!(below_config.store_dir, locations.store_dir);
     assert_eq!(
         below_config.cgroup_root.to_string_lossy(),
         cgroupfs::DEFAULT_CG_ROOT
@@ -33,6 +31,63 @@ fn test_config_default() {
     assert_eq!(below_config.cgroup_filter_out, String::new());
     assert!(!below_config.enable_gpu_stats);
     assert!(!below_config.enable_btrfs_stats);
+}
+
+fn resolve(is_root: bool, vars: &[(&str, &str)]) -> Locations {
+    let vars: std::collections::HashMap<_, _> = vars.iter().copied().collect();
+    Locations::resolve(is_root, |var| vars.get(var).map(OsString::from))
+}
+
+#[test]
+fn test_locations() {
+    let home = [("HOME", "/home/u")];
+    assert_eq!(
+        resolve(true, &home),
+        Locations {
+            config: SYSTEM_CONF.into(),
+            log_dir: std::env::temp_dir(),
+            store_dir: SYSTEM_STORE.into(),
+        }
+    );
+    assert_eq!(
+        resolve(false, &home),
+        Locations {
+            config: "/home/u/.config/belower/belower.conf".into(),
+            log_dir: "/home/u/.local/state/belower".into(),
+            store_dir: "/home/u/.local/state/belower/store".into(),
+        }
+    );
+    // XDG variables override HOME; empty ones are ignored.
+    let xdg = resolve(
+        false,
+        &[
+            ("HOME", "/home/u"),
+            ("XDG_CONFIG_HOME", "/cfg"),
+            ("XDG_STATE_HOME", ""),
+        ],
+    );
+    assert_eq!(xdg.config, Path::new("/cfg/belower/belower.conf"));
+    assert_eq!(
+        xdg.store_dir,
+        Path::new("/home/u/.local/state/belower/store")
+    );
+    // systemd's LOGS_DIRECTORY wins for logs and the store.
+    let systemd = resolve(true, &[("LOGS_DIRECTORY", "/var/log/belower")]);
+    assert_eq!(systemd.log_dir, Path::new("/var/log/belower"));
+    assert_eq!(systemd.store_dir, Path::new("/var/log/belower/store"));
+    // No HOME at all: fall back to the system-wide locations.
+    assert_eq!(resolve(false, &[]), resolve(true, &[]));
+}
+
+#[test]
+fn test_has_recordings() {
+    let tempdir = TempDir::with_prefix("below_config_store.").expect("Failed to create temp dir");
+    assert!(!has_recordings(&tempdir.path().join("missing")));
+    assert!(!has_recordings(tempdir.path()));
+    assert!(ensure_recordings(tempdir.path()).is_err());
+    std::fs::write(tempdir.path().join("index_01790985600"), b"").unwrap();
+    assert!(has_recordings(tempdir.path()));
+    assert!(ensure_recordings(tempdir.path()).is_ok());
 }
 
 #[test]
@@ -154,10 +209,7 @@ fn test_config_partial_load() {
         Err(e) => panic!("{:#}", e),
     };
     assert_eq!(below_config.log_dir.to_string_lossy(), "my magic string");
-    assert_eq!(
-        below_config.store_dir.to_string_lossy(),
-        "/var/log/belower/store"
-    );
+    assert_eq!(below_config.store_dir, Locations::current().store_dir);
 }
 
 #[test]

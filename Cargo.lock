@@ -181,6 +181,7 @@ dependencies = [
  "below-btrfs",
  "cgroupfs",
  "fb_procfs",
+ "libc",
  "serde",
  "tempfile",
  "toml",

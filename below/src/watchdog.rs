@@ -1262,7 +1262,9 @@ mod tests {
         };
         assert_eq!(watchdog_timeout_s.map(|value| value.get()), Some(30));
         assert!(Opt::try_parse_from(["belower", "record", "--watchdog-timeout-s", "0"]).is_err());
-        assert!(Opt::try_parse_from(["belower", "record", "--watchdog-timeout-s", "86401"]).is_err());
+        assert!(
+            Opt::try_parse_from(["belower", "record", "--watchdog-timeout-s", "86401"]).is_err()
+        );
 
         let opts = Opt::try_parse_from(["belower", "record"]).expect("defaults");
         let Some(Command::Record {

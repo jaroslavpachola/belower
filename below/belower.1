@@ -18,7 +18,7 @@ system data interactively.
 .SH GLOBAL OPTIONS
 .TP
 .B --config <CONFIG>
-Specify the configuration file. Default is /etc/belower/belower.conf.
+Specify the configuration file. Default is /etc/belower/belower.conf as root and ~/.config/belower/belower.conf otherwise.
 
 .TP
 .B -d, --debug
@@ -137,7 +137,8 @@ Replay historical data interactively. This subcommand supports the following opt
 
 .TP
 .B -t, --time <TIME>
-Time string specifying the replay starting point. Examples:
+Time string specifying the replay starting point. Defaults to the latest
+recording, or to the start of the snapshot with --snapshot. Examples:
 .RS
 .IP
 Keywords: now, today, yesterday
@@ -164,9 +165,9 @@ Override the default port to connect remote viewing to.
 Days adjuster. Use \fIy\fR for yesterday, repeated as needed (e.g., \fIyy\fR for 2 days ago). Examples:
 .RS
 .IP
-Yesterday at 2 pm: \fBbelow replay -r y -t 2:00pm\fR
+Yesterday at 2 pm: \fBbelower replay -r y -t 2:00pm\fR
 .IP
-Adjusted date: \fBbelow replay -r yy -t "09/03/2020 17:00"\fR
+Adjusted date: \fBbelower replay -r yy -t "09/03/2020 17:00"\fR
 .RE
 
 .TP
@@ -314,7 +315,7 @@ Show all fields. If --everything is specified, --fields and --default are overri
 Show more information other than default.
 
 \fB-b, --begin <BEGIN>\fR
-Begin time, same format as replay.
+Begin time, same format as replay. Defaults to one hour ago.
 
 \fB-e, --end <END>\fR
 End time, same format as replay.
@@ -366,7 +367,7 @@ Saved pattern in the dumprc file under [system] section.
 .TP
 \fBUsage\fR
 .PP
-\fBbelow dump system [OPTIONS] --begin <BEGIN>\fR
+\fBbelower dump system [OPTIONS]\fR
 
 .SS dump disk
 Dump disk stats
@@ -901,7 +902,7 @@ Outputs statistics for all cgroups, displaying the \fBname\fR and \fBcpu\fR fiel
 
 .TP
 .B belower dump cgroup -b "08:30:00" -e "08:30:30" -s name -F belower* -O json
-Outputs statistics for all cgroups matching the pattern \fBbelow*\fR in JSON format for the specified time range.
+Outputs statistics for all cgroups matching the pattern \fBbelower*\fR in JSON format for the specified time range.
 
 .TP
 .B belower dump cgroup -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5

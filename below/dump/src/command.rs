@@ -1134,7 +1134,7 @@ pub struct GeneralOpt {
     #[clap(short, long)]
     pub detail: bool,
     /// Begin time, same format as replay
-    #[clap(long, short)]
+    #[clap(long, short, default_value = "1h ago")]
     pub begin: String,
     /// End time, same format as replay
     #[clap(long, short, group = "time")]
