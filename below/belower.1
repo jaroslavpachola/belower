@@ -1,13 +1,13 @@
-.TH BELOW 1 "January 2025" "Version 0.8.1" "System Monitoring Tools"
+.TH BELOWER 1 "January 2025" "Version 0.8.1" "System Monitoring Tools"
 .SH NAME
-below \- interactive tool to view and record historical system data
+belower \- interactive tool to view and record historical system data
 
 .SH SYNOPSIS
-.B below
+.B belower
 [\fIOPTIONS\fR] [\fISUBCOMMAND\fR] [\fISUBCOMMAND-OPTIONS\fR]
 
 .SH DESCRIPTION
-.B below
+.B belower
 is an interactive tool designed to view, record, and analyze historical system data.
 It provides a set of subcommands to interact with live or recorded system performance metrics
 and supports operations like recording, replaying, and exporting data.
@@ -18,7 +18,7 @@ system data interactively.
 .SH GLOBAL OPTIONS
 .TP
 .B --config <CONFIG>
-Specify the configuration file. Default is /etc/below/below.conf.
+Specify the configuration file. Default is /etc/belower/belower.conf.
 
 .TP
 .B -d, --debug
@@ -361,7 +361,7 @@ Saved pattern in the dumprc file under [system] section.
 .TP
 \fBExample Commands\fR
 .PP
-\fB$ below dump system -b "08:30:00" -e "08:30:30" -f datetime vm hostname -O csv\fR
+\fB$ belower dump system -b "08:30:00" -e "08:30:30" -f datetime vm hostname -O csv\fR
 
 .TP
 \fBUsage\fR
@@ -487,19 +487,19 @@ Use a saved pattern from the \fBdumprc\fR file under the \fB[disk]\fR section.
 .SS Examples
 .B Simple example:
 .br
-\fB$ below dump disk -b "08:30:00" -e "08:30:30" -f read write discard -O csv\fR
+\fB$ belower dump disk -b "08:30:00" -e "08:30:30" -f read write discard -O csv\fR
 .br
 Outputs disk statistics for all specified fields between 08:30:00 and 08:30:30.
 
 .B Filter by name:
 .br
-\fB$ below dump disk -b "08:30:00" -e "08:30:30" -s name -F nvme0* -O json\fR
+\fB$ belower dump disk -b "08:30:00" -e "08:30:30" -s name -F nvme0* -O json\fR
 .br
 Outputs stats for disks matching "nvme0*" in JSON format.
 
 .B Top partitions by read speed:
 .br
-\fB$ below dump disk -b "08:30:00" -e "08:30:30" -s read_bytes_per_sec --rsort --top 5\fR
+\fB$ belower dump disk -b "08:30:00" -e "08:30:30" -s read_bytes_per_sec --rsort --top 5\fR
 .br
 Displays the top 5 partitions by read speed for each time slice.
 
@@ -607,13 +607,13 @@ Use a saved pattern from the \fBdumprc\fR file under the \fB[btrfs]\fR section.
 .SS Examples
 .B Simple example:
 .br
-\fB$ below dump btrfs -b "08:30:00" -e "08:30:30" -f usage -O csv\fR
+\fB$ belower dump btrfs -b "08:30:00" -e "08:30:30" -f usage -O csv\fR
 .br
 Outputs Btrfs usage statistics between 08:30:00 and 08:30:30.
 
 .B Top subvolumes by disk bytes:
 .br
-\fB$ below dump btrfs -b "08:30:00" -e "08:30:30" -s disk_bytes --rsort --top 5\fR
+\fB$ belower dump btrfs -b "08:30:00" -e "08:30:30" -s disk_bytes --rsort --top 5\fR
 .br
 Displays the top 5 subvolumes by disk usage for each time slice.
 
@@ -730,19 +730,19 @@ Use a saved pattern from the \fBdumprc\fR file under the \fB[process]\fR section
 .SS Examples
 .B Simple example:
 .br
-\fB$ below dump process -b "08:30:00" -e "08:30:30" -f comm cpu io.rwbytes_per_sec -O csv\fR
+\fB$ belower dump process -b "08:30:00" -e "08:30:30" -f comm cpu io.rwbytes_per_sec -O csv\fR
 .br
 Outputs process statistics for specified fields (command name, CPU usage, I/O) from 08:30:00 to 08:30:30 in CSV format.
 
 .B Filter by process name:
 .br
-\fB$ below dump process -b "08:30:00" -e "08:30:30" -s comm -F below* -O json\fR
+\fB$ belower dump process -b "08:30:00" -e "08:30:30" -s comm -F belower* -O json\fR
 .br
-Outputs statistics for processes matching "below*" in JSON format.
+Outputs statistics for processes matching "belower*" in JSON format.
 
 .B Top CPU-intensive processes:
 .br
-\fB$ below dump process -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5\fR
+\fB$ belower dump process -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5\fR
 .br
 Displays the top 5 processes by CPU usage for each time slice.
 
@@ -896,15 +896,15 @@ Use a saved pattern from the dumprc file under the \fB[cgroup]\fR section.
 
 .SS "Example Commands"
 .TP
-.B below dump cgroup -b "08:30:00" -e "08:30:30" -f name cpu -O csv
+.B belower dump cgroup -b "08:30:00" -e "08:30:30" -f name cpu -O csv
 Outputs statistics for all cgroups, displaying the \fBname\fR and \fBcpu\fR fields in CSV format, from 08:30:00 to 08:30:30.
 
 .TP
-.B below dump cgroup -b "08:30:00" -e "08:30:30" -s name -F below* -O json
+.B belower dump cgroup -b "08:30:00" -e "08:30:30" -s name -F belower* -O json
 Outputs statistics for all cgroups matching the pattern \fBbelow*\fR in JSON format for the specified time range.
 
 .TP
-.B below dump cgroup -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
+.B belower dump cgroup -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
 Outputs statistics for the top 5 CPU-intensive cgroups, sorted in descending order, for the specified time range.
 
 .SS dump iface
@@ -1033,11 +1033,11 @@ Use a saved pattern from the dumprc file under the \fB[iface]\fR section.
 
 .SS "Example Commands"
 .TP
-.B below dump iface -b "08:30:00" -e "08:30:30" -f interface rate -O csv
+.B belower dump iface -b "08:30:00" -e "08:30:30" -f interface rate -O csv
 Outputs statistics for all interfaces, displaying the \fBinterface\fR and \fBrate\fR fields in CSV format, from 08:30:00 to 08:30:30.
 
 .TP
-.B below dump iface -b "08:30:00" -e "08:30:30" -s interface -F eth* -O json
+.B belower dump iface -b "08:30:00" -e "08:30:30" -s interface -F eth* -O json
 Outputs statistics for all interfaces matching the pattern \fBeth*\fR in JSON format for the specified time range.
 
 .SS dump network
@@ -1233,7 +1233,7 @@ section.
 .PP
 To dump network statistics between 08:30:00 and 08:30:30, focusing on IP and IP6 in JSON format:
 .EX
-$ below dump network -b "08:30:00" -e "08:30:30" -f ip ip6 -O json
+$ belower dump network -b "08:30:00" -e "08:30:30" -f ip ip6 -O json
 .EE
 
 .SS dump transport
@@ -1494,7 +1494,7 @@ Apply a saved pattern from the dumprc file under the [ethtool] section.
 .SH EXAMPLES
 To dump ethtool queue statistics between 08:30:00 and 08:30:30 in JSON format:
 
-.SS below dump tc
+.SS belower dump tc
 Dump the tc related stats with qdiscs
 
 .TP
@@ -1631,25 +1631,25 @@ Override the default port for remote snapshot creation.
 .TP
 Run \fBlive\fR mode to display live system data interactively:
 .nf
-below live
+belower live
 .fi
 
 .TP
 Record system data in daemon mode:
 .nf
-below record
+belower record
 .fi
 
 .TP
 Replay historical data interactively:
 .nf
-below replay
+belower replay
 .fi
 
 .TP
 Dump historical data to a parseable text format:
 .nf
-below dump > output.txt
+belower dump > output.txt
 .fi
 
 .SH SEE ALSO

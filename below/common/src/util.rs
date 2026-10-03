@@ -23,7 +23,7 @@ use std::time::UNIX_EPOCH;
 /// This file contains various helpers
 use chrono::prelude::*;
 
-const BELOW_RC: &str = "/.config/below/belowrc";
+const BELOW_RC: &str = "/.config/belower/belowerrc";
 
 /// Execute an expression every n times. For example
 /// `every_n!(1 + 2, println!("I'm mod 3")` will print on the 1st,

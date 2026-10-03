@@ -37,7 +37,7 @@ pub fn setup(init: InitToken, path: PathBuf, debug: bool) -> slog::Logger {
         Ok(f) => f,
         Err(_) => {
             let temp_log_path = tempfile::Builder::new()
-                .prefix("below.log.")
+                .prefix("belower.log.")
                 .keep(true)
                 .tempfile()
                 .expect("Failed to create tempfile")

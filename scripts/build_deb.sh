@@ -19,9 +19,9 @@ set -eu
 # cd to project root
 cd "$(dirname "$(realpath "$0")")"/..
 
-# Build `below` and create a `.deb` package:
-docker build --tag localhost/below:packaged --target package-deb .
-# Copy the `.deb` package to the host filesystem which you can then install via `dpkg -i below_*.deb`:
-docker run --rm -it --volume "$(pwd):/output:Z" localhost/below:packaged /bin/bash -c 'cp target/debian/below_*.deb /output'
+# Build `belower` and create a `.deb` package:
+docker build --tag localhost/belower:packaged --target package-deb .
+# Copy the `.deb` package to the host filesystem which you can then install via `dpkg -i belower_*.deb`:
+docker run --rm -it --volume "$(pwd):/output:Z" localhost/belower:packaged /bin/bash -c 'cp target/debian/belower_*.deb /output'
 
 echo "Debian package copied to $(pwd)"

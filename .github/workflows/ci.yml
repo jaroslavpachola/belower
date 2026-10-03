@@ -15,13 +15,13 @@ jobs:
     - name: Build docker image
       run: >
         docker build
-        -t below
+        -t belower
         --target builder
         .
     - name: Run tests
       # Skip tests that require host to have cgroup2
       run: >
-        docker run below
+        docker run belower
         /root/.cargo/bin/cargo test
         --release
         --

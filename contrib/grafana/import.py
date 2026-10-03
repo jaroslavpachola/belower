@@ -35,20 +35,19 @@ METRICS = [
 
 
 def get_below_bin(snapshot):
-    """Get the below "binary" to run"""
-    env = os.environ.get("BELOW")
+    """Get the belower "binary" to run"""
+    env = os.environ.get("BELOWER")
     if env:
         return env.split()
     else:
-        # Always use the latest docker image
-        subprocess.run(["docker", "pull", "below/below:latest"], check=True)
-
+        # The image built from the repository's Dockerfile:
+        #   docker build -t belower .
         volume_args = []
         if snapshot:
             volume_args += ["-v", f"{snapshot}:{snapshot}"]
         else:
             # Else we are importing from localhost
-            store_dir = "/var/log/below/"
+            store_dir = "/var/log/belower/"
             volume_args += ["-v", f"{store_dir}:{store_dir}"]
 
         return [
@@ -56,12 +55,12 @@ def get_below_bin(snapshot):
             "run",
             "--rm",
             *volume_args,
-            "below/below:latest",
+            "belower",
         ]
 
 
 def dump(source, category, begin, end, outfile):
-    """Gets below to dump openmetrics data to given outfile"""
+    """Gets belower to dump openmetrics data to given outfile"""
     if source.lower() == "host":
         below_source = None
         below_source_args = []
@@ -132,7 +131,7 @@ def do_import(begin, end, source):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Imports below data into prometheus")
+    parser = argparse.ArgumentParser(description="Imports belower data into prometheus")
     parser.add_argument("--begin", "-b", default="99 years ago", help="Import start")
     parser.add_argument("--end", "-e", default="now", help="Import end")
     parser.add_argument("source", help="Path to snapshot or `host`, for local host")

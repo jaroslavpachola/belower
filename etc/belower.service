@@ -13,12 +13,12 @@
 # limitations under the License.
 
 [Unit]
-Description=below system monitor recording daemon
+Description=belower system monitor recording daemon
 After=time-sync.target
 
 [Service]
-LogsDirectory=below
-ExecStart=/usr/bin/below record --retain-for-s 604800 --compress
+LogsDirectory=belower
+ExecStart=/usr/bin/belower record --retain-for-s 604800 --compress
 # Enable backtraces in errors
 Environment=RUST_LIB_BACKTRACE=1
 Restart=always

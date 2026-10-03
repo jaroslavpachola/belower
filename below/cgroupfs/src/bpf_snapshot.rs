@@ -94,5 +94,5 @@ pub fn start_cgroup_bpf(
     _debug: bool,
     _cgroup_root: std::path::PathBuf,
 ) -> Result<Option<CgroupBpfHandle>> {
-    anyhow::bail!("below was built without the cgroup-bpf feature")
+    anyhow::bail!("belower was built without the cgroup-bpf feature")
 }

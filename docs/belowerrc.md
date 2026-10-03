@@ -1,6 +1,6 @@
-# Below runtime config
+# Belower runtime config
 
-`below` will use `$HOME/.config/below/belowrc` toml file for customized configuration. Here's an example belowrc file:
+`belower` will use `$HOME/.config/belower/belowerrc` toml file for customized configuration. Here's an example belowerrc file:
 
 ```toml
 [dump.system]
@@ -18,7 +18,7 @@ default_view = "process"
 
 ## dump.SUBCOMMAND
 
-`below` support saving customized dump pattern in the `[dump.{SUBCOMMAND}]` section of `$HOME/.config/below/belowrc`. The `{SUBCOMMAND}` is the subcommand of `below dump`. Here's a working example:
+`belower` support saving customized dump pattern in the `[dump.{SUBCOMMAND}]` section of `$HOME/.config/belower/belowerrc`. The `{SUBCOMMAND}` is the subcommand of `belower dump`. Here's a working example:
 
 ```toml
 [dump.system]
@@ -28,14 +28,14 @@ my_pattern1 = ["datetime", "os_release"]
 The following two commands are equivalent:
 
 ```bash
-$ below dump system -b "10:00" -e "10:10" -f datetime os_release
+$ belower dump system -b "10:00" -e "10:10" -f datetime os_release
 
-$ below dump system -b "10:00" -e "10:10" -p my_pattern1
+$ belower dump system -b "10:00" -e "10:10" -p my_pattern1
 ```
 
 ## cmd
 
-`below` support customized key mapping in the `[cmd]` section of `$HOME/.config/below/belowrc`. Here's a working example:
+`belower` support customized key mapping in the `[cmd]` section of `$HOME/.config/belower/belowerrc`. Here's a working example:
 
 ```toml
 [cmd]
@@ -44,7 +44,7 @@ prev_tab = 'ctrl-c'
 next_col = 'ctrlshift-tab'
 ```
 
-The customized key mapping is in format of `{COMMAND} = '{KEY}'`. The `{COMMAND}` can be found in below helpper view (`h` or `:help`). Here's a list of supported hot keys:
+The customized key mapping is in format of `{COMMAND} = '{KEY}'`. The `{COMMAND}` can be found in belower helpper view (`h` or `:help`). Here's a list of supported hot keys:
 
 ```
 {char}
@@ -76,7 +76,7 @@ esc
 
 ## view
 
-`below` support runtime view customization through the `[view]` section of `$HOME/.config/below/belowrc`. Here's a working example:
+`belower` support runtime view customization through the `[view]` section of `$HOME/.config/belower/belowerrc`. Here's a working example:
 
 ```toml
 [view]

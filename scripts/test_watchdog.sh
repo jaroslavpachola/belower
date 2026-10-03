@@ -4,7 +4,7 @@
 set -euo pipefail
 
 RUN_ID="$$-$(date +%s%N)"
-SCOPE="below-wd-test-$$"
+SCOPE="belower-wd-test-$$"
 CG="/sys/fs/cgroup/system.slice/${SCOPE}.scope"
 RECORD_CG="$CG/record-thread"
 STORE_WRITER_CG="$CG/store-writer-thread"
@@ -21,7 +21,7 @@ WORKDIR=""
 log() { echo "[$(date +%H:%M:%S)] $*"; }
 
 usage() {
-    echo "Usage: sudo $0 --below-binary PATH" >&2
+    echo "Usage: sudo $0 --belower-binary PATH" >&2
     exit 1
 }
 
@@ -30,23 +30,23 @@ cleanup() {
     [[ -w "$RECORD_CG/cgroup.freeze" ]] && echo 0 >"$RECORD_CG/cgroup.freeze"
     [[ -w "$STORE_WRITER_CG/cgroup.freeze" ]] && echo 0 >"$STORE_WRITER_CG/cgroup.freeze"
     systemctl stop "${SCOPE}.scope" 2>/dev/null
-    if [[ -n "$WORKDIR" && "$WORKDIR" == /tmp/below-watchdog.* ]]; then
+    if [[ -n "$WORKDIR" && "$WORKDIR" == /tmp/belower-watchdog.* ]]; then
         rm -rf "$WORKDIR"
     fi
 }
 
-mark() { echo "<4>below-wd-test-marker $RUN_ID-$1" >/dev/kmsg; }
-since_mark() { dmesg | sed -n "/below-wd-test-marker $RUN_ID-$1/,\$p"; }
+mark() { echo "<4>belower-wd-test-marker $RUN_ID-$1" >/dev/kmsg; }
+since_mark() { dmesg | sed -n "/belower-wd-test-marker $RUN_ID-$1/,\$p"; }
 reports_since() {
     since_mark "$1" |
-        grep "below watchdog: kind=stall" |
+        grep "belower watchdog: kind=stall" |
         grep " pid=$BELOW_PID " || true
 }
 
 fail_if_below_exited() {
     if [[ -n "$BELOW_PID" ]] && ! kill -0 "$BELOW_PID" 2>/dev/null; then
-        echo "below exited unexpectedly; output follows:" >&2
-        cat "$WORKDIR/below.out" >&2
+        echo "belower exited unexpectedly; output follows:" >&2
+        cat "$WORKDIR/belower.out" >&2
         exit 1
     fi
 }
@@ -205,7 +205,7 @@ check_phase() {
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --below-binary)
+        --belower-binary)
             BELOW_BIN="$2"
             shift 2
             ;;
@@ -220,23 +220,23 @@ done
 [[ -x "$BELOW_BIN" ]] || usage
 BELOW_BIN=$(readlink -f "$BELOW_BIN")
 
-WORKDIR=$(mktemp -d /tmp/below-watchdog.XXXXXX)
+WORKDIR=$(mktemp -d /tmp/belower-watchdog.XXXXXX)
 trap cleanup EXIT
 mkdir -p "$WORKDIR/log" "$WORKDIR/store"
-cat >"$WORKDIR/below.conf" <<EOF
+cat >"$WORKDIR/belower.conf" <<EOF
 log_dir = "$WORKDIR/log"
 store_dir = "$WORKDIR/store"
 EOF
 
-log "starting below in ${SCOPE}.scope"
+log "starting belower in ${SCOPE}.scope"
 systemd-run --scope --quiet --unit="$SCOPE" --slice=system.slice \
-    "$BELOW_BIN" --config "$WORKDIR/below.conf" record \
+    "$BELOW_BIN" --config "$WORKDIR/belower.conf" record \
     --interval-s 1 \
     --port 0 \
     --disable-exitstats \
     --disable-disk-stat \
     --watchdog-timeout-s "$WATCHDOG_TIMEOUT" \
-    >"$WORKDIR/below.out" 2>&1 &
+    >"$WORKDIR/belower.out" 2>&1 &
 
 for _ in $(seq 1 100); do
     if [[ -d "$CG" ]]; then
@@ -250,8 +250,8 @@ for _ in $(seq 1 100); do
     sleep 0.1
 done
 [[ -n "$BELOW_PID" ]] || {
-    echo "below did not start; output follows:" >&2
-    cat "$WORKDIR/below.out" >&2
+    echo "belower did not start; output follows:" >&2
+    cat "$WORKDIR/belower.out" >&2
     exit 1
 }
 
@@ -262,8 +262,8 @@ for _ in $(seq 1 300); do
     sleep 0.1
 done
 stored_sample_exists || {
-    echo "below did not store a sample; output follows:" >&2
-    cat "$WORKDIR/below.out" >&2
+    echo "belower did not store a sample; output follows:" >&2
+    cat "$WORKDIR/belower.out" >&2
     exit 1
 }
 

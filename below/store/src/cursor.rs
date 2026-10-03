@@ -218,7 +218,7 @@ impl StoreCursor {
         }
 
         // Mmap is unsafe because it allows unrestricted concurrent access. In
-        // our case, we only have one background process (below record) doing
+        // our case, we only have one background process (belower record) doing
         // append-only writes to both index and data files. We also use CRC to
         // verify file content. As long as we do read-only operations here, this
         // should be Ok.

@@ -28,7 +28,7 @@ the build uses it instead of building one.
 
 ## Optional: BPF cgroup stats (`cgroup-bpf` feature)
 
-The `enable_cgroup_bpf` config option needs below built with
+The `enable_cgroup_bpf` config option needs belower built with
 `--features cgroup-bpf`. That feature builds libbpf and a BPF program written in
 C, so it additionally needs clang-15+, libelf, zlib and rustfmt:
 
@@ -37,12 +37,12 @@ sudo apt install -y clang libelf-dev zlib1g-dev
 rustup component add rustfmt
 ```
 
-Without the feature, below ignores `enable_cgroup_bpf` (it logs why) and reads
+Without the feature, belower ignores `enable_cgroup_bpf` (it logs why) and reads
 the cgroup files.
 
 # Building
 
-Below's UI is quite laggy in debug builds. We recommend always building in
+belower's UI is quite laggy in debug builds. We recommend always building in
 release mode.
 
 In the root of the repository:

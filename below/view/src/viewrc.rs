@@ -62,7 +62,7 @@ pub struct ViewRc {
 
 impl ViewRc {
     /// Create a new ViewRc object base on the content in
-    /// $HOME/.config/below/belowrc. Will return default ViewRc if the belowrc
+    /// $HOME/.config/belower/belowerrc. Will return default ViewRc if the belowrc
     /// file is missing or view section does not exists. Optionally return a
     /// parse error string.
     pub fn new() -> (ViewRc, Option<String>) {

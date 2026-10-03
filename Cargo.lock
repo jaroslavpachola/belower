@@ -143,43 +143,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "below"
-version = "0.11.0"
-dependencies = [
- "anyhow",
- "aya",
- "below-common",
- "below-config",
- "below-dump",
- "below-exitstat-common",
- "below-model",
- "below-store",
- "below-view",
- "btf-rs",
- "cgroupfs",
- "clap",
- "clap_complete",
- "cursive",
- "fallible-iterator",
- "fb_procfs",
- "indicatif",
- "libc",
- "maplit",
- "nix",
- "portpicker",
- "regex",
- "scopeguard",
- "serde",
- "serde_json",
- "signal-hook",
- "slog",
- "slog-term",
- "tar",
- "tempfile",
- "tokio",
-]
-
-[[package]]
 name = "below-btrfs"
 version = "0.11.0"
 dependencies = [
@@ -371,6 +334,43 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.6",
+]
+
+[[package]]
+name = "belower"
+version = "0.11.0"
+dependencies = [
+ "anyhow",
+ "aya",
+ "below-common",
+ "below-config",
+ "below-dump",
+ "below-exitstat-common",
+ "below-model",
+ "below-store",
+ "below-view",
+ "btf-rs",
+ "cgroupfs",
+ "clap",
+ "clap_complete",
+ "cursive",
+ "fallible-iterator",
+ "fb_procfs",
+ "indicatif",
+ "libc",
+ "maplit",
+ "nix",
+ "portpicker",
+ "regex",
+ "scopeguard",
+ "serde",
+ "serde_json",
+ "signal-hook",
+ "slog",
+ "slog-term",
+ "tar",
+ "tempfile",
+ "tokio",
 ]
 
 [[package]]

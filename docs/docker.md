@@ -1,22 +1,17 @@
 Note the instructions use `podman` instead of `docker` because at time of
 writing, docker doesn't yet have support for cgroup2.
 
-# Prebuilt image
+There is no prebuilt belower image yet; build one from the repository's
+Dockerfile:
 
 ```shell
-$ podman run --privileged --cgroupns=host --pid=host -it below/below:latest
-```
-
-# Local build
-
-```shell
-$ git clone https://github.com/facebookincubator/below.git ~/dev/below
+$ git clone https://github.com/jaroslavpachola/belower.git ~/dev/belower
 <...>
 
-$ cd ~/dev/below
+$ cd ~/dev/belower
 
-$ podman build -t below .
+$ podman build -t belower .
 <...>
 
-$ podman run --privileged --cgroupns=host --pid=host -it below
+$ podman run --privileged --cgroupns=host --pid=host -it belower
 ```

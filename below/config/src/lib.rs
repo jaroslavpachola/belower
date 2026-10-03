@@ -28,8 +28,8 @@ use serde::Serialize;
 #[cfg(test)]
 mod test;
 
-pub const BELOW_DEFAULT_CONF: &str = "/etc/below/below.conf";
-const BELOW_DEFAULT_STORE: &str = "/var/log/below/store";
+pub const BELOW_DEFAULT_CONF: &str = "/etc/belower/belower.conf";
+const BELOW_DEFAULT_STORE: &str = "/var/log/belower/store";
 
 /// Global below config
 pub static BELOW_CONFIG: OnceLock<BelowConfig> = OnceLock::new();

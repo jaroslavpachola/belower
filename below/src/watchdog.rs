@@ -35,7 +35,7 @@ use std::thread::JoinHandle;
 use std::time::Duration;
 
 #[cfg(not(target_has_atomic = "64"))]
-compile_error!("below's watchdog requires lock-free 64-bit atomics");
+compile_error!("belower's watchdog requires lock-free 64-bit atomics");
 
 const KMSG_PATH: &str = "/dev/kmsg";
 const RECORD_MAX: usize = 800;
@@ -274,7 +274,7 @@ impl Watchdog {
         };
         let worker_shared = Arc::clone(&shared);
         let worker = thread::Builder::new()
-            .name("below-watchdog".to_owned())
+            .name("belower-wdog".to_owned())
             .spawn(move || watchdog_thread_main(worker_shared, targets, kmsg, options.timeout))?;
 
         Ok(Self {
@@ -554,7 +554,7 @@ fn emit_report<W: io::Write>(
     let heartbeat_age_ms = observed_ns.saturating_sub(heartbeat_ns) / 1_000_000;
     if writeln!(
         &mut record,
-        "<4>below watchdog: kind=stall heartbeat_age_ms={} timeout_ms={} pid={} heartbeat_mono_ms={} record_tid={} record_stack_truncated={} record_stack_status={} record_stack={} store_writer_tid={} store_writer_stack_truncated={} store_writer_stack_status={} store_writer_stack={}",
+        "<4>belower watchdog: kind=stall heartbeat_age_ms={} timeout_ms={} pid={} heartbeat_mono_ms={} record_tid={} record_stack_truncated={} record_stack_status={} record_stack={} store_writer_tid={} store_writer_stack_truncated={} store_writer_stack_status={} store_writer_stack={}",
         heartbeat_age_ms,
         duration_ns(timeout) / 1_000_000,
         std::process::id(),
@@ -580,7 +580,7 @@ fn emit_error<W: io::Write>(kmsg: &mut W, operation: &str, error: libc::c_int) {
     let mut record = FixedBuf::<256>::new();
     if writeln!(
         &mut record,
-        "<3>below watchdog: kind=error operation={operation} error={error}"
+        "<3>belower watchdog: kind=error operation={operation} error={error}"
     )
     .is_ok()
     {
@@ -596,7 +596,7 @@ fn emit_poll_error<W: io::Write>(
     let mut record = FixedBuf::<256>::new();
     if writeln!(
         &mut record,
-        "<3>below watchdog: kind=error operation=poll timer_revents={timer_revents} control_revents={control_revents}"
+        "<3>belower watchdog: kind=error operation=poll timer_revents={timer_revents} control_revents={control_revents}"
     )
     .is_ok()
     {
@@ -764,7 +764,7 @@ mod tests {
 
     fn assert_schema(line: &str) {
         let mut parts = line.split_ascii_whitespace();
-        assert_eq!(parts.next(), Some("<4>below"));
+        assert_eq!(parts.next(), Some("<4>belower"));
         assert_eq!(parts.next(), Some("watchdog:"));
         let keys = parts
             .map(|part| part.split_once('=').expect("key=value field").0)
@@ -1045,11 +1045,11 @@ mod tests {
             writer.written,
             [
                 format!(
-                    "<3>below watchdog: kind=error operation=timerfd_settime error={}\n",
+                    "<3>belower watchdog: kind=error operation=timerfd_settime error={}\n",
                     libc::EBADF
                 ),
                 format!(
-                    "<3>below watchdog: kind=error operation=poll timer_revents={} control_revents={}\n",
+                    "<3>belower watchdog: kind=error operation=poll timer_revents={} control_revents={}\n",
                     libc::POLLERR,
                     libc::POLLHUP
                 ),
@@ -1252,7 +1252,7 @@ mod tests {
             .is_err()
         );
 
-        let opts = Opt::try_parse_from(["below", "record", "--watchdog-timeout-s", "30"])
+        let opts = Opt::try_parse_from(["belower", "record", "--watchdog-timeout-s", "30"])
             .expect("valid timeout");
         let Some(Command::Record {
             watchdog_timeout_s, ..
@@ -1261,10 +1261,10 @@ mod tests {
             panic!("record command");
         };
         assert_eq!(watchdog_timeout_s.map(|value| value.get()), Some(30));
-        assert!(Opt::try_parse_from(["below", "record", "--watchdog-timeout-s", "0"]).is_err());
-        assert!(Opt::try_parse_from(["below", "record", "--watchdog-timeout-s", "86401"]).is_err());
+        assert!(Opt::try_parse_from(["belower", "record", "--watchdog-timeout-s", "0"]).is_err());
+        assert!(Opt::try_parse_from(["belower", "record", "--watchdog-timeout-s", "86401"]).is_err());
 
-        let opts = Opt::try_parse_from(["below", "record"]).expect("defaults");
+        let opts = Opt::try_parse_from(["belower", "record"]).expect("defaults");
         let Some(Command::Record {
             watchdog_timeout_s,
             writer_buffer_size,

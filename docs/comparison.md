@@ -1,7 +1,7 @@
 # Comparison with alternative tools
 
 Missing anything? File an
-[issue](https://github.com/facebookincubator/below/issues).
+[issue](https://github.com/jaroslavpachola/belower/issues).
 
 ## Atop
 
@@ -85,16 +85,16 @@ https://collectd.org/
 * Requires external tooling for data visualization
 * No direct cgroup or container integration by default
 
-## below
+## belower
 
-https://github.com/facebookincubator/below
+https://github.com/jaroslavpachola/belower (a fork of https://github.com/facebookincubator/below)
 
 * Terminal interface
   * Supports filtering, zooming, pausing, sorting, scrolling
 * Built in support for persisting/replaying historical data
 * In-depth host-level stats
 * cgroup awareness with cgroup tree view
-* `below dump` for scriptable access to historical data
+* `belower dump` for scriptable access to historical data
 * Goes to great lengths to avoid priority inversions during host resource
   contention
 

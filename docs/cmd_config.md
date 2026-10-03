@@ -1,4 +1,4 @@
-# Below commands
+# belower commands
 
 ## How to run command
 * Invoke command palette by typing `:`, you should notice the command palette on the bottom becomes highlighted.
@@ -20,7 +20,7 @@ shows the current supported commands with 5 columns:
 * Description: man for the command.
 
 ## Customize hot key
-See `belowrc.md`.
+See `belowerrc.md`.
 
 ## Supported sort arguments
 ### Cgroup

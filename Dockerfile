@@ -41,10 +41,10 @@ RUN <<HEREDOC
     # - RUSTFLAGS is needed for crates with `build.rs` scripts to include the search path for linking libs.
     export CFLAGS='-isystem /usr/include'
     export RUSTFLAGS='-L /usr/lib64'
-    cargo zigbuild --bin below --release --target "$(uname -m)-unknown-linux-gnu.2.34"
+    cargo zigbuild --bin belower --release --target "$(uname -m)-unknown-linux-gnu.2.34"
 
-    cp "target/$(uname -m)-unknown-linux-gnu/release/below" /usr/local/bin/below
-    strip /usr/local/bin/below
+    cp "target/$(uname -m)-unknown-linux-gnu/release/belower" /usr/local/bin/belower
+    strip /usr/local/bin/belower
 HEREDOC
 
 # Support for `scripts/build_deb.sh`:
@@ -52,7 +52,7 @@ FROM builder AS package-deb
 RUN cargo install cargo-deb
 COPY README.md .
 COPY etc/ .
-RUN cargo deb --package below --no-build --target "$(uname -m)-unknown-linux-gnu"
+RUN cargo deb --package belower --no-build --target "$(uname -m)-unknown-linux-gnu"
 
 # Provides a minimal base for the runtime image to use:
 FROM fedora:42 AS root-fs
@@ -68,5 +68,5 @@ HEREDOC
 # Compose the final minimal image to publish:
 FROM scratch AS runtime
 COPY --link --from=root-fs /root-fs /
-COPY --link --from=builder /usr/local/bin/below /below
-ENTRYPOINT ["/below"]
+COPY --link --from=builder /usr/local/bin/belower /belower
+ENTRYPOINT ["/belower"]

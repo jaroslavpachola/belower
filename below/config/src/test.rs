@@ -24,7 +24,7 @@ fn test_config_default() {
     assert_eq!(below_config.log_dir, std::env::temp_dir());
     assert_eq!(
         below_config.store_dir.to_string_lossy(),
-        "/var/log/below/store"
+        "/var/log/belower/store"
     );
     assert_eq!(
         below_config.cgroup_root.to_string_lossy(),
@@ -41,16 +41,16 @@ fn test_config_fs_failure() {
         TempDir::with_prefix("below_config_fs_failuer.").expect("Failed to create temp dir");
     let path = tempdir.path();
     match BelowConfig::load(path) {
-        Ok(_) => panic!("Below should not load if the non existing path is not default path"),
+        Ok(_) => panic!("belower should not load if the non existing path is not default path"),
         Err(e) => assert_eq!(
             format!("{}", e),
             format!("{} exists and is not a file", path.to_string_lossy())
         ),
     }
 
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
     match BelowConfig::load(&path) {
-        Ok(_) => panic!("Below should not load if the non existing path is not default path"),
+        Ok(_) => panic!("belower should not load if the non existing path is not default path"),
         Err(e) => assert_eq!(
             format!("{}", e),
             format!("No such file or directory: {}", path.to_string_lossy())
@@ -61,7 +61,7 @@ fn test_config_fs_failure() {
 #[test]
 fn test_config_load_success() {
     let tempdir = TempDir::with_prefix("below_config_load.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -69,7 +69,7 @@ fn test_config_load_success() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         log_dir = '/var/log/below'
         store_dir = '/var/log/below'
@@ -96,14 +96,14 @@ fn test_config_load_success() {
 fn test_config_load_failed() {
     let tempdir =
         TempDir::with_prefix("below_config_load_failed.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
     let mut file = std::fs::OpenOptions::new()
         .read(true)
         .write(true)
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         log_dir = '/var/log/below'
         store_dir = '/var/log/below'
@@ -117,7 +117,7 @@ fn test_config_load_failed() {
         .expect("Failed to flush during testing failure");
 
     match BelowConfig::load(&path) {
-        Ok(_) => panic!("Below should not load since it is an invalid configuration file"),
+        Ok(_) => panic!("belower should not load since it is an invalid configuration file"),
         Err(e) => {
             let err_msg = format!("{}", e);
             assert!(err_msg.starts_with("Failed to parse config file"));
@@ -133,7 +133,7 @@ fn test_config_load_failed() {
 #[test]
 fn test_config_partial_load() {
     let tempdir = TempDir::with_prefix("below_config_load.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -141,7 +141,7 @@ fn test_config_partial_load() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         log_dir = 'my magic string'
     "#;
@@ -156,14 +156,14 @@ fn test_config_partial_load() {
     assert_eq!(below_config.log_dir.to_string_lossy(), "my magic string");
     assert_eq!(
         below_config.store_dir.to_string_lossy(),
-        "/var/log/below/store"
+        "/var/log/belower/store"
     );
 }
 
 #[test]
 fn test_config_valid_stack_trace_filter_single() {
     let tempdir = TempDir::with_prefix("below_config_stack.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -171,7 +171,7 @@ fn test_config_valid_stack_trace_filter_single() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         process_stack_trace_filter = "Uninterruptible"
     "#;
@@ -189,7 +189,7 @@ fn test_config_valid_stack_trace_filter_single() {
 #[test]
 fn test_config_valid_stack_trace_filter_multiple() {
     let tempdir = TempDir::with_prefix("below_config_stack.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -197,7 +197,7 @@ fn test_config_valid_stack_trace_filter_multiple() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         enable_process_stack_traces = true
         process_stack_trace_filter = "UninterruptibleAndRunning"
@@ -216,7 +216,7 @@ fn test_config_valid_stack_trace_filter_multiple() {
 #[test]
 fn test_config_valid_stack_trace_filter_all() {
     let tempdir = TempDir::with_prefix("below_config_stack.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -224,7 +224,7 @@ fn test_config_valid_stack_trace_filter_all() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         process_stack_trace_filter = "All"
     "#;
@@ -242,7 +242,7 @@ fn test_config_valid_stack_trace_filter_all() {
 #[test]
 fn test_config_valid_stack_trace_filter_none() {
     let tempdir = TempDir::with_prefix("below_config_stack.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -250,7 +250,7 @@ fn test_config_valid_stack_trace_filter_none() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         process_stack_trace_filter = "None"
     "#;
@@ -268,7 +268,7 @@ fn test_config_valid_stack_trace_filter_none() {
 #[test]
 fn test_config_invalid_stack_trace_filter_typo() {
     let tempdir = TempDir::with_prefix("below_config_stack.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -276,7 +276,7 @@ fn test_config_invalid_stack_trace_filter_typo() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         process_stack_trace_filter = "Untiterruptible"
     "#;
@@ -297,7 +297,7 @@ fn test_config_invalid_stack_trace_filter_typo() {
 #[test]
 fn test_config_invalid_stack_trace_filter_empty_value() {
     let tempdir = TempDir::with_prefix("below_config_stack.").expect("Failed to create temp dir");
-    let path = tempdir.path().join("below.config");
+    let path = tempdir.path().join("belower.config");
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)
@@ -305,7 +305,7 @@ fn test_config_invalid_stack_trace_filter_empty_value() {
         .truncate(true)
         .create(true)
         .open(&path)
-        .expect("Fail to open below.conf in tempdir");
+        .expect("Fail to open belower.conf in tempdir");
     let config_str = r#"
         process_stack_trace_filter = ""
     "#;

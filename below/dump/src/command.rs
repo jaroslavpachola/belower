@@ -235,7 +235,7 @@ static SYSTEM_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 ********************** Example Commands **********************
 
-$ below dump system -b "08:30:00" -e "08:30:30" -f datetime vm hostname -O csv
+$ belower dump system -b "08:30:00" -e "08:30:30" -f datetime vm hostname -O csv
 
 "#,
         about = SYSTEM_ABOUT,
@@ -342,15 +342,15 @@ static DISK_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Simple example:
 
-$ below dump disk -b "08:30:00" -e "08:30:30" -f read write discard -O csv
+$ belower dump disk -b "08:30:00" -e "08:30:30" -f read write discard -O csv
 
 Output stats for all "nvme0*" matched disk from 08:30:00 to 08:30:30:
 
-$ below dump disk -b "08:30:00" -e "08:30:30" -s name -F nvme0* -O json
+$ belower dump disk -b "08:30:00" -e "08:30:30" -s name -F nvme0* -O json
 
 Output stats for top 5 read partitions for each time slice from 08:30:00 to 08:30:30:
 
-$ below dump disk -b "08:30:00" -e "08:30:30" -s read_bytes_per_sec --rsort --top 5
+$ belower dump disk -b "08:30:00" -e "08:30:30" -s read_bytes_per_sec --rsort --top 5
 
 "#,
         about = DISK_ABOUT,
@@ -418,11 +418,11 @@ static BTRFS_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Simple example:
 
-$ below dump btrfs -b "08:30:00" -e "08:30:30" -f usage -O csv
+$ belower dump btrfs -b "08:30:00" -e "08:30:30" -f usage -O csv
 
 Output stats for top 5 subvolumes for each time slice from 08:30:00 to 08:30:30:
 
-$ below dump btrfs -b "08:30:00" -e "08:30:30" -s disk_bytes --rsort --top 5
+$ belower dump btrfs -b "08:30:00" -e "08:30:30" -s disk_bytes --rsort --top 5
 
 "#,
         about = BTRFS_ABOUT,
@@ -518,15 +518,15 @@ static PROCESS_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Simple example:
 
-$ below dump process -b "08:30:00" -e "08:30:30" -f comm cpu io.rwbytes_per_sec -O csv
+$ belower dump process -b "08:30:00" -e "08:30:30" -f comm cpu io.rwbytes_per_sec -O csv
 
-Output stats for all "below*" matched processes from 08:30:00 to 08:30:30:
+Output stats for all "belower*" matched processes from 08:30:00 to 08:30:30:
 
-$ below dump process -b "08:30:00" -e "08:30:30" -s comm -F below* -O json
+$ belower dump process -b "08:30:00" -e "08:30:30" -s comm -F below* -O json
 
 Output stats for top 5 CPU intense processes for each time slice from 08:30:00 to 08:30:30:
 
-$ below dump process -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
+$ belower dump process -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
 
 "#,
         about = PROCESS_ABOUT,
@@ -635,17 +635,17 @@ static CGROUP_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Simple example:
 
-$ below dump cgroup -b "08:30:00" -e "08:30:30" -f name cpu -O csv
+$ belower dump cgroup -b "08:30:00" -e "08:30:30" -f name cpu -O csv
 
-Output stats for all cgroups matching pattern "below*" for time slices
+Output stats for all cgroups matching pattern "belower*" for time slices
 from 08:30:00 to 08:30:30:
 
-$ below dump cgroup -b "08:30:00" -e "08:30:30" -s name -F below* -O json
+$ belower dump cgroup -b "08:30:00" -e "08:30:30" -s name -F below* -O json
 
 Output stats for top 5 CPU intense cgroups for each time slice
 from 08:30:00 to 08:30:30 recursively:
 
-$ below dump cgroup -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
+$ belower dump cgroup -b "08:30:00" -e "08:30:30" -s cpu.usage_pct --rsort --top 5
 
 "#,
         about = CGROUP_ABOUT,
@@ -768,12 +768,12 @@ static IFACE_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Simple example:
 
-$ below dump iface -b "08:30:00" -e "08:30:30" -f interface rate -O csv
+$ belower dump iface -b "08:30:00" -e "08:30:30" -f interface rate -O csv
 
 Output stats for all iface stats matching pattern "eth*" for time slices
 from 08:30:00 to 08:30:30:
 
-$ below dump iface -b "08:30:00" -e "08:30:30" -s interface -F eth* -O json
+$ belower dump iface -b "08:30:00" -e "08:30:30" -s interface -F eth* -O json
 
 "#,
         about = IFACE_ABOUT,
@@ -864,7 +864,7 @@ static NETWORK_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Example:
 
-$ below dump network -b "08:30:00" -e "08:30:30" -f ip ip6 -O json
+$ belower dump network -b "08:30:00" -e "08:30:30" -f ip ip6 -O json
 
 "#,
         about = NETWORK_ABOUT,
@@ -948,7 +948,7 @@ static TRANSPORT_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Example:
 
-$ below dump transport -b "08:30:00" -e "08:30:30" -f tcp udp -O json
+$ belower dump transport -b "08:30:00" -e "08:30:30" -f tcp udp -O json
 
 "#,
         about = TRANSPORT_ABOUT,
@@ -1028,7 +1028,7 @@ static ETHTOOL_QUEUE_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 
 Example:
 
-$ below dump ethtool-queue -b "08:30:00" -e "08:30:30" -O json
+$ belower dump ethtool-queue -b "08:30:00" -e "08:30:30" -O json
 
 "#,
         about = ETHTOOL_QUEUE_ABOUT,
@@ -1104,7 +1104,7 @@ static TC_LONG_ABOUT: LazyLock<String> = LazyLock::new(|| {
 * --everything: includes everything (equivalent to --default --detail).
 ********************** Example Commands **********************
 Example:
-$ below dump tc -b "08:30:00" -e "08:30:30" -O json
+$ belower dump tc -b "08:30:00" -e "08:30:30" -O json
 "#,
         about = TC_ABOUT,
         common_fields = join(enum_iterator::all::<CommonField>()),
