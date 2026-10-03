@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use serde::Deserialize;
+use serde::Serialize;
 
 use super::get_belowrc_filename;
 use super::get_belowrc_view_section_key;
@@ -20,7 +21,7 @@ use super::get_belowrc_view_section_key;
 /// Enum of supported front view.
 // We didn't re-use the MainViewState because we don't want to
 // expose internal state like Process(ProcessZoomState::Cgroup)
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum DefaultFrontView {
     Cgroup,

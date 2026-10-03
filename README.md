@@ -50,6 +50,8 @@ belower is a standalone project and does not track upstream `below`. So far:
   mode. Set `mouse = false` under `[view]` in belowerrc to turn the mouse off.
 * **Faster first screen.** Live mode shows rates after one second rather than
   `?` for a whole interval.
+* **Remembers the view.** The screen, tabs, sorting and column widths you
+  leave belower with are restored the next time it starts.
 
 ## Demo
 

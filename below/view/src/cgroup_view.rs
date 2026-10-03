@@ -121,6 +121,10 @@ impl StateCommon for CgroupState {
         self.set_sort_tag(sort_order, reverse)
     }
 
+    fn get_sort_string(&self) -> Option<String> {
+        self.sort_order.as_ref().map(ToString::to_string)
+    }
+
     fn set_sort_string(&mut self, selection: &str, reverse: &mut bool) -> bool {
         use std::str::FromStr;
         match Self::TagType::from_str(selection) {

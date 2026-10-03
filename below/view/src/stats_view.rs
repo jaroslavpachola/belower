@@ -91,6 +91,10 @@ pub trait StateCommon: Send + Sync {
     fn set_sort_tag_from_tab_idx(&mut self, _tab: &str, _idx: usize, _reverse: &mut bool) -> bool {
         false
     }
+    /// The field currently sorted by, in the form set_sort_string() takes.
+    fn get_sort_string(&self) -> Option<String> {
+        None
+    }
 
     fn get_model(&self) -> MutexGuard<Self::ModelType>;
     fn get_model_mut(&self) -> MutexGuard<Self::ModelType>;

@@ -86,6 +86,14 @@ default_view = "process"
 
 Supported configuration:
 
-* (optional)`default_view`: String, acceptable value: ["process", "cgroup", "system"] -- Indicate the user default front page
+* (optional)`default_view`: String, acceptable value: ["process", "cgroup", "system"] -- Indicate the user default front page. Without it, belower starts on the screen you last left it on.
 * (optional)`collapse_cgroups`: bool, acceptable value: [true, false] -- Indicate if a user want to collapse cgroup by default
 * (optional)`mouse`: bool, acceptable value: [true, false], default true -- Use the mouse: click a row to select it, a tab to switch to it, or a column title to sort by it (click again to reverse), and scroll with the wheel. While belower uses the mouse, most terminals select text with Shift held down; set `mouse = false` to select text without it.
+
+## Remembered view
+
+When the view exits, belower saves the screen you were on, each screen's tab
+and sort column, and the column width adjustment to
+`~/.local/state/belower/view.toml` (`$XDG_STATE_HOME/belower/view.toml`), and
+restores them the next time it starts. `default_view` above, if set, still
+picks the starting screen. Delete the file to start from the defaults.

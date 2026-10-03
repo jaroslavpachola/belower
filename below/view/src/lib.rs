@@ -106,6 +106,7 @@ mod filter_popup;
 mod help_menu;
 mod process_tabs;
 mod process_view;
+mod remembered;
 mod render;
 pub mod stats_view;
 mod status_bar;
@@ -494,7 +495,10 @@ impl View {
             .focus_name("dynamic_view")
             .expect("Could not set focus at initialization!");
 
-        // Set default view from viewrc
+        // Restore the view as the user left it. belowrc's default_view, if
+        // set, still picks the starting screen.
+        let remembered = remembered::RememberedView::load();
+        remembered.restore(&mut self.inner);
         if let Some(view) = self
             .inner
             .user_data::<ViewState>()
@@ -502,6 +506,7 @@ impl View {
             .viewrc
             .default_view
             .clone()
+            .or(remembered.screen)
         {
             let main_view_state = &mut self
                 .inner
@@ -541,6 +546,7 @@ impl View {
             view_warn!(c, "{}", msg);
         }
         self.inner.run();
+        remembered::RememberedView::capture(&mut self.inner).save();
 
         Ok(())
     }
