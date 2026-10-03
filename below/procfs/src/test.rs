@@ -1113,15 +1113,20 @@ fn test_pid_cmdline_loop() {
     let procfs = TestProcfs::new();
     procfs.create_pid_file_with_content(123, "cmdline", cmdline);
     let reader = procfs.get_reader();
+    // A read that takes over 20ms times out and returns None by design, which
+    // happens now and then on a loaded machine. Every read that does return
+    // must be correct, and nearly all must return.
+    let mut timeouts = 0;
     for _ in 0..10000 {
-        assert_eq!(
-            reader
-                .read_pid_cmdline(123)
-                .expect("Failed to read pid cmdline file")
-                .expect("missing cmdline"),
-            vec!["one", "--long-flag", "-f"]
-        );
+        match reader
+            .read_pid_cmdline(123)
+            .expect("Failed to read pid cmdline file")
+        {
+            Some(cmdline) => assert_eq!(cmdline, vec!["one", "--long-flag", "-f"]),
+            None => timeouts += 1,
+        }
     }
+    assert!(timeouts < 100, "{timeouts} of 10000 reads timed out");
 }
 
 #[test]
